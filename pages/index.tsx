@@ -8,7 +8,7 @@ interface Result {
     failedProblems: string[],
 }
 
-const targets = ["GlenBzc", "Algor_", "hirsute","suidingyunmeinv" ]
+const targets = ["GlenBzc", "Algor_", "hirsute", "suidingyunmeinv"]
 
 export default function Home({results}: { results: Result[] }) {
     return (
