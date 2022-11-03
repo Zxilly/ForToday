@@ -130,7 +130,7 @@ export async function getServerSideProps() {
 
     let results: Array<Result> = [];
     for (const member of targets) {
-        const res = await fetch(`https://codeforces.com/api/user.status?handle=${member}&from=1&count=50`)
+        const res = await fetch(`https://codeforces.com/api/user.status?handle=${member}&from=1&count=20`)
             .then(res => res.json())
         const passProblems = new Set<string>()
         const problems = new Set<string>()
