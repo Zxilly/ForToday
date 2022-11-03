@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import {NextApiRequest, NextApiResponse} from 'next';
 import {fetchAll} from "../../tentacle";
 import {client} from "../../constants";
 

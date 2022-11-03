@@ -27,7 +27,6 @@ export class ProblemStatus {
 }
 
 export interface Tentacle {
-    coolDown: number
     fetch: (account: string) => Promise<ProblemStatus>;
     batchFetch?: (accounts: string[]) => Promise<Map<string, ProblemStatus>>;
 }

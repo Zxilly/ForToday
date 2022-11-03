@@ -4,30 +4,46 @@ import {CODEFORCES_GROUP_ID} from "../constants";
 import {isValidDate} from "../utils/utils";
 
 export class CodeforcesTentacle implements Tentacle {
-    coolDown = 2 * 1000
-
     async fetch(account: string): Promise<ProblemStatus> {
-        let submitted = 0
 
-        const res = await fetch(`https://codeforces.com/api/user.status?handle=${account}&from=1&count=50`)
-            .then(res => res.json())
         const passProblems = new Set<string>()
         const problems = new Set<string>()
 
-        for (const sub of res["result"]) {
-            const timeSecs = sub["creationTimeSeconds"]
-            const date = new Date(timeSecs * 1000)
+        const resp = await fetch(`https://codeforces.com/submissions/${account}`).then(res => res.text())
+        const dom = new JSDOM(resp).window.document
+
+        const table = dom.querySelector('table.status-frame-datatable')
+        if (table == null) {
+            return {
+                pass: [],
+                failed: [],
+                submitted: 0
+            }
+        }
+        const rows = table.querySelectorAll('tr:not(.first-row)')
+        for (const row of Array.from(rows)) {
+            const cells = row.querySelectorAll('td')
+            const time = row.querySelector('span.format-time')
+            if (!time) {
+                continue
+            }
+            const timeStr = time.textContent?.trim()
+            if (!timeStr) {
+                continue
+            }
+            const date = new Date(timeStr)
             if (!isValidDate(date)) {
                 continue
             }
-            submitted++
-            const problem = sub["problem"]
-            const id = problem["contestId"] + problem["index"] + " " + problem["name"]
-            if (sub["verdict"] === "OK") {
-                passProblems.add(id)
-            } else {
-                problems.add(id)
+            const problemID = cells[3].textContent?.trim()
+            if (!problemID) {
+                continue
             }
+            const status = row.querySelector('span.verdict-accepted')
+            if (status) {
+                passProblems.add(problemID)
+            }
+            problems.add(problemID)
         }
 
         const failedProblems = Array.from(problems).filter(x => !passProblems.has(x))
@@ -35,7 +51,7 @@ export class CodeforcesTentacle implements Tentacle {
         return {
             pass: Array.from(passProblems).map(x => `CF: ${x}`),
             failed: failedProblems.map(x => `CF: ${x}`),
-            submitted: submitted
+            submitted: problems.size
         }
     }
 
@@ -63,51 +79,56 @@ export class CodeforcesTentacle implements Tentacle {
 
             const indexCount = doc.querySelectorAll("span[pageIndex]").length
 
+            const tasks: Promise<void>[] = []
             for (let i = 1; i <= indexCount; i++) {
-                if (i !== 1) {
-                    response = await fetch(`${url}/page/${i}`).then((res) => res.text())
-                    doc = new JSDOM(response).window.document
-                }
-
-                const table = doc.querySelector('table.status-frame-datatable')
-                if (table == null) {
-                    continue
-                }
-                const rows = table.querySelectorAll('tr:not(.first-row)')
-                for (const row of Array.from(rows)) {
-                    const cells = row.querySelectorAll('td')
-                    const time = row.querySelector('span.format-time')
-                    if (!time) {
-                        continue
-                    }
-                    const timeStr = time.textContent?.trim()
-                    if (!timeStr) {
-                        continue
-                    }
-                    const date = new Date(timeStr)
-                    if (!isValidDate(date)) {
-                        continue
+                const task = async () => {
+                    if (i !== 1) {
+                        response = await fetch(`${url}/page/${i}`).then((res) => res.text())
+                        doc = new JSDOM(response).window.document
                     }
 
-                    const submitUser = cells[2].textContent?.trim().replaceAll('\n', '')
-                    if (!submitUser) {
-                        continue
+                    const table = doc.querySelector('table.status-frame-datatable')
+                    if (table == null) {
+                        return
                     }
-                    if (!accounts.includes(submitUser)) {
-                        continue
-                    }
+                    const rows = table.querySelectorAll('tr:not(.first-row)')
+                    for (const row of Array.from(rows)) {
+                        const cells = row.querySelectorAll('td')
+                        const time = row.querySelector('span.format-time')
+                        if (!time) {
+                            continue
+                        }
+                        const timeStr = time.textContent?.trim()
+                        if (!timeStr) {
+                            continue
+                        }
+                        const date = new Date(timeStr)
+                        if (!isValidDate(date)) {
+                            continue
+                        }
 
-                    const problemID = cells[3].textContent?.trim().replaceAll('\n', '')
-                    if (!problemID) {
-                        continue
+                        const submitUser = cells[2].textContent?.trim().replaceAll('\n', '')
+                        if (!submitUser) {
+                            continue
+                        }
+                        if (!accounts.includes(submitUser)) {
+                            continue
+                        }
+
+                        const problemID = cells[3].textContent?.trim().replaceAll('\n', '')
+                        if (!problemID) {
+                            continue
+                        }
+                        const status = row.querySelector('span.verdict-accepted')
+                        if (status) {
+                            submitSuccess.get(submitUser)?.add(problemID)
+                        }
+                        submitMap.get(submitUser)?.push(problemID)
                     }
-                    const status = row.querySelector('span.verdict-accepted')
-                    if (status) {
-                        submitSuccess.get(submitUser)?.add(problemID)
-                    }
-                    submitMap.get(submitUser)?.push(problemID)
                 }
+                tasks.push(task())
             }
+            await Promise.all(tasks)
             for (const [user, problems] of Array.from(submitMap)) {
                 for (const problem of Array.from(problems)) {
                     if (!submitSuccess.get(user)?.has(problem)) {

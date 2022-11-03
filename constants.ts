@@ -6,12 +6,6 @@ const { serverRuntimeConfig } = getConfig()
 
 export const targets: Target[] = [
     {
-        name: "GlenBzc",
-        accounts: {
-            codeforces: "GlenBzc"
-        }
-    },
-    {
         name: "Algor_",
         accounts: {
             codeforces: "Algor_"
