@@ -3,7 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   serverRuntimeConfig: {
-
+    redisUrl: process.env.REDIS_URL
   }
 }
 
