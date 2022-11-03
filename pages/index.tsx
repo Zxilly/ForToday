@@ -1,13 +1,14 @@
 // noinspection JSIgnoredPromiseFromCall
 
 import {Box, Container, SimpleGrid} from '@chakra-ui/react'
-import {targets} from "./member";
 
 interface Result {
     name: string,
     successProblems: string[],
     failedProblems: string[],
 }
+
+const targets = ["GlenBzc", "Algor_", "hirsute","suidingyunmeinv" ]
 
 export default function Home({results}: { results: Result[] }) {
     return (
