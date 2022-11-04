@@ -91,7 +91,9 @@ export class CodeforcesTentacle implements Tentacle {
             submitFailedMap.set(target, new Set<string>());
         }
 
+        console.log("Fetching Codeforces group submissions...")
         const res = await fetch(`https://codeforces.com/group/${CODEFORCES_GROUP_ID}/contests`).then(res => res.text())
+        console.log("Fetched Codeforces group submissions")
         const dom = new JSDOM(res).window.document
 
         const trs = Array.from(dom.querySelectorAll("tr[data-contestId]"))
@@ -105,87 +107,92 @@ export class CodeforcesTentacle implements Tentacle {
                 return value && value.trim()
             })[0].trim() ?? "")
 
+        const tasks = new Array<Promise<void>>()
         for (let j = 0; j < contestIds.length; j++) {
-            const url = `https://codeforces.com/group/${CODEFORCES_GROUP_ID}/contest/${contestIds[j]}/status`
-            let response = await fetch(url).then((res) => res.text())
-            let doc = new JSDOM(response).window.document
+            const task = async () => {
+                const url = `https://codeforces.com/group/${CODEFORCES_GROUP_ID}/contest/${contestIds[j]}/status`
+                let response = await fetch(url).then((res) => res.text())
+                let doc = new JSDOM(response).window.document
 
-            const indexCount = doc.querySelectorAll("span[pageIndex]").length
+                const indexCount = doc.querySelectorAll("span[pageIndex]").length
 
-            const tasks: Promise<void>[] = []
-            for (let i = 1; i <= indexCount; i++) {
-                const task = async () => {
-                    if (i !== 1) {
-                        response = await fetch(`${url}/page/${i}`).then((res) => res.text())
-                        doc = new JSDOM(response).window.document
+                const tasks: Promise<void>[] = []
+                for (let i = 1; i <= indexCount; i++) {
+                    const task = async () => {
+                        if (i !== 1) {
+                            response = await fetch(`${url}/page/${i}`).then((res) => res.text())
+                            doc = new JSDOM(response).window.document
+                        }
+
+                        const table = doc.querySelector('table.status-frame-datatable')
+                        if (table == null) {
+                            return
+                        }
+                        const rows = table.querySelectorAll('tr:not(.first-row)')
+                        for (const row of Array.from(rows)) {
+                            const cells = row.querySelectorAll('td')
+                            const time = row.querySelector('span.format-time')
+                            if (!time) {
+                                continue
+                            }
+                            const timeStr = time.textContent?.trim()
+                            if (!timeStr) {
+                                continue
+                            }
+                            const date = new Date(timeStr)
+                            if (!isValidDate(date)) {
+                                continue
+                            }
+
+                            const submitUser = cells[2].textContent?.trim().replaceAll('\n', '')
+                            if (!submitUser) {
+                                continue
+                            }
+                            if (!accounts.includes(submitUser)) {
+                                continue
+                            }
+
+                            const problemID = cells[3].textContent?.trim().replaceAll('\n', '')
+                            if (!problemID) {
+                                continue
+                            }
+                            const contestName = contestNames[j]
+                            const name = `${problemID}`
+                            const id = `${contestName}${name}`
+
+                            const url = cells[3]?.querySelector('a')?.href
+                            if (!url) {
+                                continue
+                            }
+
+                            const status = row.querySelector('span.verdict-accepted')
+                            const problem = {
+                                platform: 'codeforces' as TentacleID,
+                                url: `https://codeforces.com${url}` ?? "",
+                                title: name,
+                                contest: contestName,
+                                id: id,
+                            }
+                            if (status) {
+                                submitSuccess.get(submitUser)?.add(problem.id)
+                            }
+                            submitMap.get(submitUser)?.push(problem)
+                        }
                     }
-
-                    const table = doc.querySelector('table.status-frame-datatable')
-                    if (table == null) {
-                        return
-                    }
-                    const rows = table.querySelectorAll('tr:not(.first-row)')
-                    for (const row of Array.from(rows)) {
-                        const cells = row.querySelectorAll('td')
-                        const time = row.querySelector('span.format-time')
-                        if (!time) {
-                            continue
+                    tasks.push(task())
+                }
+                await Promise.all(tasks)
+                for (const [user, problems] of Array.from(submitMap)) {
+                    for (const problem of Array.from(problems)) {
+                        if (!submitSuccess.get(user)?.has(problem.id)) {
+                            submitFailedMap.get(user)?.add(problem.id)
                         }
-                        const timeStr = time.textContent?.trim()
-                        if (!timeStr) {
-                            continue
-                        }
-                        const date = new Date(timeStr)
-                        if (!isValidDate(date)) {
-                            continue
-                        }
-
-                        const submitUser = cells[2].textContent?.trim().replaceAll('\n', '')
-                        if (!submitUser) {
-                            continue
-                        }
-                        if (!accounts.includes(submitUser)) {
-                            continue
-                        }
-
-                        const problemID = cells[3].textContent?.trim().replaceAll('\n', '')
-                        if (!problemID) {
-                            continue
-                        }
-                        const contestName = contestNames[j]
-                        const name = `${problemID}`
-                        const id = `${contestName}${name}`
-
-                        const url = cells[3]?.querySelector('a')?.href
-                        if (!url) {
-                            continue
-                        }
-
-                        const status = row.querySelector('span.verdict-accepted')
-                        const problem = {
-                            platform: 'codeforces' as TentacleID,
-                            url: `https://codeforces.com${url}` ?? "",
-                            title: name,
-                            contest: contestName,
-                            id: id,
-                        }
-                        if (status) {
-                            submitSuccess.get(submitUser)?.add(problem.id)
-                        }
-                        submitMap.get(submitUser)?.push(problem)
                     }
                 }
-                tasks.push(task())
             }
-            await Promise.all(tasks)
-            for (const [user, problems] of Array.from(submitMap)) {
-                for (const problem of Array.from(problems)) {
-                    if (!submitSuccess.get(user)?.has(problem.id)) {
-                        submitFailedMap.get(user)?.add(problem.id)
-                    }
-                }
-            }
+            tasks.push(task())
         }
+        await Promise.all(tasks)
 
         const result = new Map<string, UserProblemStatus>()
         for (const [user, problems] of Array.from(submitSuccess)) {
