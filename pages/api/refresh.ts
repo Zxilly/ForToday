@@ -16,7 +16,7 @@ export default async function handler(
 
     const logger = getNewTimedLogger()
 
-    const data = await fetchAll()
+    const data = await fetchAll(logger)
     await client.set("data", JSON.stringify(data))
     await client.del("lock")
     response.status(200).json({
