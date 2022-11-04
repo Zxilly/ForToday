@@ -1,6 +1,6 @@
 // noinspection JSIgnoredPromiseFromCall
 
-import {Box, Container, SimpleGrid, Link} from '@chakra-ui/react'
+import {Box, Container, Link, SimpleGrid} from '@chakra-ui/react'
 import {client} from "../constants";
 import {SuccessProblem, UserProblemStatus} from "../types/tentacle";
 import MD5 from 'crypto-js/md5';
@@ -10,47 +10,53 @@ import {groupBy} from "../utils/utils";
 export default function Home({result}: { result: Record<string, UserProblemStatus> }) {
     return (
         <Container maxW="container.xl">
-            <SimpleGrid columns={4} spacing={10}>
-                {Object.entries(result).map(([name, status]) => {
-                    return <Box
-                        padding={4}
-                        key={name}
-                        maxW='sm'
-                        borderWidth='1px'
-                        borderRadius='lg'
-                        overflow='hidden'>
-                        <Box
-                            mt='1'
-                            fontWeight='semibold'
-                            fontSize='xl'
-                            as='h1'
-                            lineHeight='tight'
-                            noOfLines={1}
-                        >
-                            {name}
+            <Box
+                m={6}
+                p={6}
+                borderWidth='1px'
+                borderRadius='lg'>
+                <SimpleGrid columns={4} spacing={10}>
+                    {Object.entries(result).map(([name, status]) => {
+                        return <Box
+                            padding={4}
+                            key={name}
+                            maxW='sm'
+                            borderWidth='1px'
+                            borderRadius='lg'
+                            overflow='hidden'>
+                            <Box
+                                mt='1'
+                                fontWeight='semibold'
+                                fontSize='xl'
+                                as='h1'
+                                lineHeight='tight'
+                                noOfLines={1}
+                            >
+                                {name}
+                            </Box>
+                            <Box>
+                                <Box as='span' fontSize='4rem'>
+                                    {status.pass.length}
+                                </Box>
+                                <Box as='span' fontSize='3rem' m={2}>
+                                    /
+                                </Box>
+                                <Box as='span' color='gray.600' fontSize='2rem'>
+                                    {status.pass.length + status.failed.length}
+                                </Box>
+                                <Box as='span' color='gray.600' m={1} fontSize='1.5rem'>
+                                    ({status.submitted})
+                                </Box>
+                                {
+                                    groupBy(UserProblemStatus.fromObject(status).getAll(), (x: SuccessProblem) => x.contest).map((group) => {
+                                        return <ProblemGroup key={Math.random().toString()} problems={group}/>
+                                    })
+                                }
+                            </Box>
                         </Box>
-                        <Box>
-                            <Box as='span' fontSize='4rem'>
-                                {status.pass.length}
-                            </Box>
-                            <Box as='span' fontSize='3rem' m={2}>
-                                /
-                            </Box>
-                            <Box as='span' color='gray.600' fontSize='2rem'>
-                                {status.pass.length + status.failed.length}
-                            </Box>
-                            <Box as='span' color='gray.600' m={1} fontSize='1.5rem'>
-                                ({status.submitted})
-                            </Box>
-                            {
-                                groupBy(UserProblemStatus.fromObject(status).getAll(), (x: SuccessProblem) => x.contest).map((group) => {
-                                    return <ProblemGroup key={Math.random().toString()} problems={group}/>
-                                })
-                            }
-                        </Box>
-                    </Box>
-                })}
-            </SimpleGrid>
+                    })}
+                </SimpleGrid>
+            </Box>
         </Container>
     )
 }
