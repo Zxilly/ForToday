@@ -16,7 +16,9 @@ export default function Home({result}: { result: Record<string, UserProblemStatu
                 borderWidth='1px'
                 borderRadius='lg'>
                 <SimpleGrid columns={4} spacing={10}>
-                    {Object.entries(result).map(([name, status]) => {
+                    {Object.entries(result).sort(
+                        ([a,], [b,]) => a.localeCompare(b)
+                    ).map(([name, status]) => {
                         return <Box
                             padding={4}
                             key={name}
