@@ -78,6 +78,8 @@ function ProblemGroup({
     if (problems.length === 0) {
         return <></>
     }
+    problems.sort((a, b) => a.title.localeCompare(b.title))
+
     return <div>
         <div><Box as='span' color={'gray.500'}
                   fontSize='0.5rem'>{`${problems[0].platform} ${problems[0].contest}`}</Box></div>
