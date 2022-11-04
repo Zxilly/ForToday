@@ -110,8 +110,10 @@ export class CodeforcesTentacle implements Tentacle {
         const tasks = new Array<Promise<void>>()
         for (let j = 0; j < contestIds.length; j++) {
             const task = async () => {
+                console.log(`Fetching Codeforces contest ${contestNames[j]} submissions...`)
                 const url = `https://codeforces.com/group/${CODEFORCES_GROUP_ID}/contest/${contestIds[j]}/status`
                 let response = await fetch(url).then((res) => res.text())
+                console.log(`Fetched Codeforces contest ${contestNames[j]} submissions.`)
                 let doc = new JSDOM(response).window.document
 
                 const indexCount = doc.querySelectorAll("span[pageIndex]").length
@@ -120,7 +122,9 @@ export class CodeforcesTentacle implements Tentacle {
                 for (let i = 1; i <= indexCount; i++) {
                     const task = async () => {
                         if (i !== 1) {
+                            console.log(`Fetching Codeforces contest ${contestNames[j]} submissions page ${i}...`)
                             response = await fetch(`${url}/page/${i}`).then((res) => res.text())
+                            console.log(`Fetched Codeforces contest ${contestNames[j]} submissions page ${i}.`)
                             doc = new JSDOM(response).window.document
                         }
 
