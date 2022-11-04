@@ -91,7 +91,7 @@ export class CodeforcesTentacle implements Tentacle {
             submitFailedMap.set(target, new Set<string>());
         }
 
-        logger("Fetching Codeforces group submissions...")
+        // logger("Fetching Codeforces group submissions...")
         const res = await fetch(`https://codeforces.com/group/${CODEFORCES_GROUP_ID}/contests`).then(res => res.text())
         logger("Fetched Codeforces group submissions")
         const dom = new JSDOM(res).window.document
@@ -110,7 +110,7 @@ export class CodeforcesTentacle implements Tentacle {
         const tasks = new Array<Promise<void>>()
         for (let j = 0; j < contestIds.length; j++) {
             const task = async () => {
-                logger(`Fetching Codeforces contest ${contestNames[j]} submissions...`)
+                // logger(`Fetching Codeforces contest ${contestNames[j]} submissions...`)
                 const url = `https://codeforces.com/group/${CODEFORCES_GROUP_ID}/contest/${contestIds[j]}/status`
                 let response = await fetch(url).then((res) => res.text())
                 logger(`Fetched Codeforces contest ${contestNames[j]} submissions.`)
@@ -122,7 +122,7 @@ export class CodeforcesTentacle implements Tentacle {
                 for (let i = 1; i <= indexCount; i++) {
                     const task = async () => {
                         if (i !== 1) {
-                            logger(`Fetching Codeforces contest ${contestNames[j]} submissions page ${i}...`)
+                            // logger(`Fetching Codeforces contest ${contestNames[j]} submissions page ${i}...`)
                             response = await fetch(`${url}/page/${i}`).then((res) => res.text())
                             logger(`Fetched Codeforces contest ${contestNames[j]} submissions page ${i}.`)
                             doc = new JSDOM(response).window.document

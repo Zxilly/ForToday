@@ -17,13 +17,13 @@ export async function fetchAll(logger: LogFunc): Promise<Record<string, UserProb
 
     const tasks: Promise<void>[] = [];
     for (const [key, impl] of Object.entries(tentaclesImpl)) {
-        logger(`Fetching ${key}...`)
+        // logger(`Fetching ${key}...`)
         const task = async () => {
             const subtasks: Promise<void>[] = [];
             const validTargets = targets.filter(target => Object.hasOwn(target.accounts, key))
             for (const target of validTargets) {
                 const account = target.accounts[key as TentacleID]
-                logger(`Fetching ${key} ${account}...`)
+                // logger(`Fetching ${key} ${account}...`)
                 const subtask = async () => {
                     const status = await impl.fetch(account, logger);
                     result[target.name] = UserProblemStatus.merge(result[target.name], status)
@@ -42,7 +42,7 @@ export async function fetchAll(logger: LogFunc): Promise<Record<string, UserProb
                 return
             }
 
-            logger(`Fetching ${key} all...`)
+            // logger(`Fetching ${key} all...`)
             const accounts = targets.filter(target => Object.hasOwn(target.accounts, key)).map(target => target.accounts[key as TentacleID]);
             const statuses = await impl.batchFetch!!(accounts, logger);
             for (const [account, status] of Array.from(statuses)) {
