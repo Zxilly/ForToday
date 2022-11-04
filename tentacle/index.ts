@@ -2,12 +2,13 @@ import type {Tentacle, TentacleID} from "../types/tentacle";
 import {CodeforcesTentacle} from "./codeforces";
 import {targets} from "../constants";
 import {UserProblemStatus} from "../types/tentacle";
+import {LogFunc} from "../utils/utils";
 
 const tentaclesImpl: Record<TentacleID, Tentacle> = {
     codeforces: new CodeforcesTentacle()
 }
 
-export async function fetchAll(): Promise<Record<string, UserProblemStatus>> {
+export async function fetchAll(logger: LogFunc): Promise<Record<string, UserProblemStatus>> {
     const users = targets.map(t => t.name)
     const result: Record<string, UserProblemStatus> = {}
     for (const user of users) {
@@ -16,17 +17,17 @@ export async function fetchAll(): Promise<Record<string, UserProblemStatus>> {
 
     const tasks: Promise<void>[] = [];
     for (const [key, impl] of Object.entries(tentaclesImpl)) {
-        console.log(`Fetching ${key}...`)
+        logger(`Fetching ${key}...`)
         const task = async () => {
             const subtasks: Promise<void>[] = [];
             const validTargets = targets.filter(target => Object.hasOwn(target.accounts, key))
             for (const target of validTargets) {
                 const account = target.accounts[key as TentacleID]
-                console.log(`Fetching ${key} ${account}...`)
+                logger(`Fetching ${key} ${account}...`)
                 const subtask = async () => {
-                    const status = await impl.fetch(account);
+                    const status = await impl.fetch(account, logger);
                     result[target.name] = UserProblemStatus.merge(result[target.name], status)
-                    console.log(`Fetched ${key} ${account}.`)
+                    logger(`Fetched ${key} ${account}.`)
                 }
                 subtasks.push(subtask())
             }
@@ -41,14 +42,14 @@ export async function fetchAll(): Promise<Record<string, UserProblemStatus>> {
                 return
             }
 
-            console.log(`Fetching ${key} all...`)
+            logger(`Fetching ${key} all...`)
             const accounts = targets.filter(target => Object.hasOwn(target.accounts, key)).map(target => target.accounts[key as TentacleID]);
-            const statuses = await impl.batchFetch!!(accounts);
+            const statuses = await impl.batchFetch!!(accounts, logger);
             for (const [account, status] of Array.from(statuses)) {
                 const name = targets.find(target => target.accounts[key as TentacleID] === account)!!.name
                 result[name] = UserProblemStatus.merge(result[name], status)
             }
-            console.log(`Fetched ${key} all.`)
+            logger(`Fetched ${key} all.`)
         }
         tasks.push(task());
     }

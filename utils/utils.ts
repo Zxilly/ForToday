@@ -15,3 +15,14 @@ export function groupBy(array: Array<any>, f: any) {
         return groups[group];
     });
 }
+
+export type LogFunc = (message: string) => void;
+
+export function getNewTimedLogger(): LogFunc {
+    let last = Date.now();
+    return function (msg: string) {
+        const now = Date.now();
+        console.log(`${msg} (${now - last}ms)`);
+        last = now;
+    }
+}

@@ -1,3 +1,5 @@
+import {LogFunc} from "../utils/utils";
+
 export type Problem = {
     id: string
     platform: TentacleID
@@ -53,8 +55,8 @@ export class UserProblemStatus {
 }
 
 export interface Tentacle {
-    fetch: (account: string) => Promise<UserProblemStatus>;
-    batchFetch?: (accounts: string[]) => Promise<Map<string, UserProblemStatus>>;
+    fetch: (account: string, logger: LogFunc) => Promise<UserProblemStatus>;
+    batchFetch?: (accounts: string[], logger: LogFunc) => Promise<Map<string, UserProblemStatus>>;
 }
 
 export type TentacleID = "codeforces"
