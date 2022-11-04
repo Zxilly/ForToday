@@ -113,7 +113,7 @@ export class CodeforcesTentacle implements Tentacle {
                 // logger(`Fetching Codeforces contest ${contestNames[j]} submissions...`)
                 const url = `https://codeforces.com/group/${CODEFORCES_GROUP_ID}/contest/${contestIds[j]}/status`
                 // let response = await fetch(url).then((res) => res.text())
-                logger(`Fetched Codeforces contest ${contestNames[j]} submissions.`)
+                // logger(`Fetched Codeforces contest ${contestNames[j]} submissions.`)
                 // let doc = new JSDOM(response).window.document
                 //
                 // const indexCount = doc.querySelectorAll("span[pageIndex]").length
