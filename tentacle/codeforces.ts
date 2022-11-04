@@ -112,20 +112,31 @@ export class CodeforcesTentacle implements Tentacle {
             const task = async () => {
                 // logger(`Fetching Codeforces contest ${contestNames[j]} submissions...`)
                 const url = `https://codeforces.com/group/${CODEFORCES_GROUP_ID}/contest/${contestIds[j]}/status`
-                let response = await fetch(url).then((res) => res.text())
+                // let response = await fetch(url).then((res) => res.text())
                 logger(`Fetched Codeforces contest ${contestNames[j]} submissions.`)
-                let doc = new JSDOM(response).window.document
-
-                const indexCount = doc.querySelectorAll("span[pageIndex]").length
+                // let doc = new JSDOM(response).window.document
+                //
+                // const indexCount = doc.querySelectorAll("span[pageIndex]").length
 
                 const tasks: Promise<void>[] = []
-                for (let i = 1; i <= indexCount; i++) {
+                for (let i = 1; i <= 3; i++) {
                     const task = async () => {
-                        if (i !== 1) {
-                            // logger(`Fetching Codeforces contest ${contestNames[j]} submissions page ${i}...`)
-                            response = await fetch(`${url}/page/${i}`).then((res) => res.text())
-                            logger(`Fetched Codeforces contest ${contestNames[j]} submissions page ${i}.`)
-                            doc = new JSDOM(response).window.document
+                        // logger(`Fetching Codeforces contest ${contestNames[j]} submissions page ${i}...`)
+                        const response = await fetch(`${url}/page/${i}`).then((res) => res.text())
+                        logger(`Fetched Codeforces contest ${contestNames[j]} submissions page ${i}.`)
+                        const doc = new JSDOM(response).window.document
+
+                        const pageIndex = doc.querySelector("span.page-index.active")
+                        if (!pageIndex) {
+                            return
+                        }
+                        const index = pageIndex.getAttribute("pageIndex")
+                        if (!index) {
+                            return
+                        }
+                        if (parseInt(index) !== i) {
+                            logger(`Codeforces contest ${contestNames[j]} submissions page ${i} is not valid.`)
+                            return
                         }
 
                         const table = doc.querySelector('table.status-frame-datatable')
