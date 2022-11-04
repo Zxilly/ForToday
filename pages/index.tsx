@@ -1,9 +1,13 @@
 // noinspection JSIgnoredPromiseFromCall
 
-import {Box, Container, SimpleGrid} from '@chakra-ui/react'
+import {Box, Container, SimpleGrid, Link} from '@chakra-ui/react'
 import {client} from "../constants";
-import {ProblemStatus} from "../types/tentacle";
-export default function Home({result}: { result: Record<string, ProblemStatus> }) {
+import {SuccessProblem, UserProblemStatus} from "../types/tentacle";
+import MD5 from 'crypto-js/md5';
+import React from "react";
+import {groupBy} from "../utils/utils";
+
+export default function Home({result}: { result: Record<string, UserProblemStatus> }) {
     return (
         <Container maxW="container.xl">
             <SimpleGrid columns={4} spacing={10}>
@@ -26,30 +30,21 @@ export default function Home({result}: { result: Record<string, ProblemStatus> }
                             {name}
                         </Box>
                         <Box>
-                            <Box as='span' fontSize='6rem'>
+                            <Box as='span' fontSize='4rem'>
                                 {status.pass.length}
                             </Box>
-                            <Box as='span' fontSize='4rem' m={2}>
+                            <Box as='span' fontSize='3rem' m={2}>
                                 /
                             </Box>
-                            <Box as='span' color='gray.600' fontSize='3rem'>
+                            <Box as='span' color='gray.600' fontSize='2rem'>
                                 {status.pass.length + status.failed.length}
                             </Box>
                             <Box as='span' color='gray.600' m={1} fontSize='1.5rem'>
                                 ({status.submitted})
                             </Box>
                             {
-                                status.failed.map((problem) => {
-                                    return <Box key={problem} as='div' color='red.500' fontSize='1rem'>
-                                        {problem}
-                                    </Box>
-                                })
-                            }
-                            {
-                                status.pass.map((problem) => {
-                                    return <Box key={problem} as='div' color='green.500' fontSize='1rem'>
-                                        {problem}
-                                    </Box>
+                                groupBy(UserProblemStatus.fromObject(status).getAll(), (x: SuccessProblem) => x.contest).map((group) => {
+                                    return <ProblemGroup key={Math.random().toString()} problems={group}/>
                                 })
                             }
                         </Box>
@@ -69,10 +64,33 @@ export async function getServerSideProps() {
             }
         }
     }
-    const result: Record<string, ProblemStatus> = JSON.parse(data)
+    const result: Record<string, UserProblemStatus> = JSON.parse(data)
     return {
         props: {
             result
         },
     }
+}
+
+function ProblemGroup({
+                          problems,
+                      }: { problems: SuccessProblem[] }): JSX.Element {
+    if (problems.length === 0) {
+        return <></>
+    }
+    return <div>
+        <div><Box as='span' color={'gray.500'}
+                  fontSize='0.5rem'>{`${problems[0].platform} ${problems[0].contest}`}</Box></div>
+        {
+            problems.map((problem) => {
+                return <div key={MD5(problem.id).toString()}>
+                    <Link href={problem.url}>
+                        <Box as='span' color={problem.success ? 'green.500' : 'red.500'} fontSize='1rem'>
+                            {problem.title}
+                        </Box>
+                    </Link>
+                </div>
+            })
+        }
+    </div>
 }

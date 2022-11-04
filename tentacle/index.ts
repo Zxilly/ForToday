@@ -1,17 +1,17 @@
 import type {Tentacle, TentacleID} from "../types/tentacle";
 import {CodeforcesTentacle} from "./codeforces";
 import {targets} from "../constants";
-import {ProblemStatus} from "../types/tentacle";
+import {UserProblemStatus} from "../types/tentacle";
 
 const tentaclesImpl: Record<TentacleID, Tentacle> = {
     codeforces: new CodeforcesTentacle()
 }
 
-export async function fetchAll(): Promise<Record<string, ProblemStatus>> {
+export async function fetchAll(): Promise<Record<string, UserProblemStatus>> {
     const users = targets.map(t => t.name)
-    const result: Record<string, ProblemStatus> = {}
+    const result: Record<string, UserProblemStatus> = {}
     for (const user of users) {
-        result[user] = new ProblemStatus([], [], 0)
+        result[user] = new UserProblemStatus([], [], 0)
     }
 
     const tasks: Promise<void>[] = [];
@@ -25,7 +25,7 @@ export async function fetchAll(): Promise<Record<string, ProblemStatus>> {
                 console.log(`Fetching ${key} ${account}...`)
                 const subtask = async () => {
                     const status = await impl.fetch(account);
-                    result[target.name] = ProblemStatus.merge(result[target.name], status)
+                    result[target.name] = UserProblemStatus.merge(result[target.name], status)
                     console.log(`Fetched ${key} ${account}.`)
                 }
                 subtasks.push(subtask())
@@ -46,7 +46,7 @@ export async function fetchAll(): Promise<Record<string, ProblemStatus>> {
             const statuses = await impl.batchFetch!!(accounts);
             for (const [account, status] of Array.from(statuses)) {
                 const name = targets.find(target => target.accounts[key as TentacleID] === account)!!.name
-                result[name] = ProblemStatus.merge(result[name], status)
+                result[name] = UserProblemStatus.merge(result[name], status)
             }
             console.log(`Fetched ${key} all.`)
         }

@@ -1,8 +1,6 @@
-import {Target} from "./types/tentacle";
+import type {Target} from "./types/tentacle";
 import getConfig from 'next/config'
 import Redis from "ioredis"
-
-const { serverRuntimeConfig } = getConfig()
 
 export const targets: Target[] = [
     {
@@ -57,4 +55,5 @@ export const targets: Target[] = [
 
 export const CODEFORCES_GROUP_ID = "MlnUj8Knxs"
 
+const { serverRuntimeConfig } = getConfig()
 export const client = new Redis(serverRuntimeConfig.redisUrl)
