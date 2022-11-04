@@ -23,6 +23,5 @@ export function getNewTimedLogger(): LogFunc {
     return function (msg: string) {
         const now = Date.now();
         console.log(`${msg} (${now - last}ms)`);
-        last = now;
     }
 }
