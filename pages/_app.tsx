@@ -15,6 +15,7 @@ export default function App({Component, pageProps}: AppProps) {
 
     return <>
         <Head>
+            <meta name="referrer" content="never"/>
             <title>Three days</title>
         </Head>
         <ChakraProvider>
