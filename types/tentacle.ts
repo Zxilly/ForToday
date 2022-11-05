@@ -69,9 +69,9 @@ export interface Tentacle {
     batchFetch?: (accounts: string[], logger: LogFunc) => Promise<Map<string, UserProblemStatus>>;
 }
 
-export type TentacleID = "codeforces"
+export type TentacleID = "codeforces" | "nowcoder"
 
 export interface Target {
     name: string;
-    accounts: Record<Partial<TentacleID>, string>
+    accounts: Partial<Record<TentacleID, string>>
 }

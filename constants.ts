@@ -36,7 +36,8 @@ export const targets: Target[] = [
     {
         name: "AgOH",
         accounts: {
-            codeforces: "AgOH"
+            codeforces: "AgOH",
+            nowcoder: "409383157"
         }
     },
     {

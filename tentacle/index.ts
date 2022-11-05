@@ -3,9 +3,11 @@ import { CodeforcesTentacle } from "./codeforces";
 import { targets } from "../constants";
 import { UserProblemStatus } from "../types/tentacle";
 import { LogFunc } from "../utils/utils";
+import { NowcoderTentacle } from "./nowcoder";
 
 const tentaclesImpl: Record<TentacleID, Tentacle> = {
-    codeforces: new CodeforcesTentacle()
+    codeforces: new CodeforcesTentacle(),
+    nowcoder: new NowcoderTentacle()
 };
 
 export async function fetchAll(logger: LogFunc): Promise<Record<string, UserProblemStatus>>
@@ -27,7 +29,7 @@ export async function fetchAll(logger: LogFunc): Promise<Record<string, UserProb
             const validTargets = targets.filter(target => Object.hasOwn(target.accounts, key));
             for(const target of validTargets)
             {
-                const account = target.accounts[key as TentacleID];
+                const account = target.accounts[key as TentacleID]!;
                 // logger(`Fetching ${key} ${account}...`)
                 const subtask = async () =>
                 {
