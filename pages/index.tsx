@@ -94,7 +94,7 @@ function ProblemGroup({
         {
             problems.map((problem) => {
                 return <div key={MD5(problem.id).toString()}>
-                    <Link href={problem.url}>
+                    <Link href={problem.url} isExternal>
                         <Box as='span' color={problem.success ? 'green.500' : 'red.500'} fontSize='1rem'>
                             {problem.title}
                         </Box>
