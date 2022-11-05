@@ -1,6 +1,6 @@
-import type {Target} from "./types/tentacle";
-import getConfig from 'next/config'
-import Redis from "ioredis"
+import type { Target } from "./types/tentacle";
+import getConfig from "next/config";
+import Redis from "ioredis";
 
 export const targets: Target[] = [
     {
@@ -51,9 +51,9 @@ export const targets: Target[] = [
             codeforces: "zxilly"
         }
     }
-]
+];
 
-export const CODEFORCES_GROUP_ID = "MlnUj8Knxs"
+export const CODEFORCES_GROUP_ID = "MlnUj8Knxs";
 
-const { serverRuntimeConfig } = getConfig()
-export const client = new Redis(serverRuntimeConfig.redisUrl)
+const { serverRuntimeConfig } = getConfig();
+export const client = new Redis(serverRuntimeConfig.redisUrl);
