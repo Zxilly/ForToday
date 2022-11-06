@@ -196,7 +196,10 @@ export class CodeforcesTentacle implements Tentacle
                     {
                         if(!userSuccessIds.has(problem.id))
                         {
-                            userFailedIds.add(problem.id);
+                            if(!userFailedIds.has(problem.id))
+                            {
+                                userFailedIds.add(problem.id);
+                            }
                         }
                     }
                 }
