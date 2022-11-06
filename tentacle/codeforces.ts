@@ -187,7 +187,6 @@ export class CodeforcesTentacle implements Tentacle
                             if(status.length !== 0) submitSuccessIds.add(problem.id);
                             submits.push(problem);
                         });
-                        console.log(`Codeforces contest ${contestNames[j]} submissions page ${i} is valid.`);
                     };
                     singlePageTasks.push(singlePageTask());
                 }
