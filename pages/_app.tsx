@@ -5,7 +5,6 @@ import { useEffect } from "react";
 import { Analytics } from "@vercel/analytics/react";
 import Head from "next/head";
 
-
 export default function App({ Component, pageProps }: AppProps)
 {
     useEffect(() =>
@@ -16,14 +15,16 @@ export default function App({ Component, pageProps }: AppProps)
         }, 1000 * 60 * 5);
     }, []);
 
-    return <>
-        <Head>
-            <meta name="referrer" content="never"/>
-            <title>Three days</title>
-        </Head>
-        <ChakraProvider>
-            <Component {...pageProps} />
-        </ChakraProvider>
-        <Analytics/>
-    </>;
+    return (
+        <>
+            <Head>
+                <meta name="referrer" content="never"/>
+                <title>Three days</title>
+            </Head>
+            <ChakraProvider>
+                <Component {...pageProps} />
+            </ChakraProvider>
+            <Analytics/>
+        </>
+    );
 }

@@ -10,6 +10,11 @@ export type Problem = {
 
 export type SuccessProblem = Problem & { success: boolean }
 
+type safeFunction = (...args: any[]) => any
+export type PureUserProblemStatus = {
+    [k in keyof UserProblemStatus]: UserProblemStatus[k] extends safeFunction ? never : UserProblemStatus[k]
+}
+
 export class UserProblemStatus
 {
     pass: Problem[];
@@ -24,7 +29,8 @@ export class UserProblemStatus
     }
 
 
-    public static fromObject(obj: any): UserProblemStatus
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    public static fromObject(obj: PureUserProblemStatus): UserProblemStatus
     {
         return new UserProblemStatus(obj.pass, obj.failed, obj.submitted);
     }
@@ -64,14 +70,16 @@ export class UserProblemStatus
     }
 }
 
-export interface Tentacle {
+export interface Tentacle
+{
     fetch: (account: string, logger: LogFunc) => Promise<UserProblemStatus>;
     batchFetch?: (accounts: string[], logger: LogFunc) => Promise<Map<string, UserProblemStatus>>;
 }
 
 export type TentacleID = "codeforces" | "nowcoder"
 
-export interface Target {
+export interface Target
+{
     name: string;
-    accounts: Partial<Record<TentacleID, string>>
+    accounts: Partial<Record<TentacleID, string>>;
 }

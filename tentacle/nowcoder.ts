@@ -1,18 +1,20 @@
-import { Tentacle, UserProblemStatus } from "../types/tentacle";
+import { Problem, Tentacle, UserProblemStatus } from "../types/tentacle";
 import { isValidDate, LogFunc } from "../utils/utils";
 import { JSDOM } from "jsdom";
-import { Problem } from "../types/tentacle";
 
 export class NowcoderTentacle implements Tentacle
 {
-    async fetch(account: string, logger: LogFunc): Promise<UserProblemStatus>
+    async fetch(account: string, _logger: LogFunc): Promise<UserProblemStatus>
     {
-        const res = await fetch(`https://ac.nowcoder.com/acm/contest/profile/${account}/practice-coding?pageSize=200`);
+        const res = await fetch(
+            `https://ac.nowcoder.com/acm/contest/profile/${account}/practice-coding?pageSize=200`
+        );
         const dom = new JSDOM(await res.text()).window.document;
         const table = dom.querySelector("table.table-hover");
         const tbody = table?.querySelector("tbody");
         const rows = tbody?.querySelectorAll("tr");
-        if(rows === undefined || rows.length === 1) return new UserProblemStatus([], [], 0);
+        if(rows === undefined || rows.length === 1)
+            return new UserProblemStatus([], [], 0);
         const passProblems: Problem[] = [];
         const passProblemsID = new Set<string>();
         const failedProblems: Problem[] = [];
@@ -31,9 +33,9 @@ export class NowcoderTentacle implements Tentacle
                 platform: "nowcoder",
                 contest: "",
                 title: info.textContent ?? "",
-                url: `https://ac.nowcoder.com${url}`
+                url: `https://ac.nowcoder.com${url}`,
             };
-            if(items.item(3).textContent==="100")
+            if(items.item(3).textContent === "100")
             {
                 if(!passProblemsID.has(problem.id))
                 {

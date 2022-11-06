@@ -1,13 +1,13 @@
 import type { Tentacle, TentacleID } from "../types/tentacle";
+import { UserProblemStatus } from "../types/tentacle";
 import { CodeforcesTentacle } from "./codeforces";
 import { targets } from "../constants";
-import { UserProblemStatus } from "../types/tentacle";
 import { LogFunc } from "../utils/utils";
 import { NowcoderTentacle } from "./nowcoder";
 
 const tentaclesImpl: Record<TentacleID, Tentacle> = {
     codeforces: new CodeforcesTentacle(),
-    nowcoder: new NowcoderTentacle()
+    nowcoder: new NowcoderTentacle(),
 };
 
 export async function fetchAll(logger: LogFunc): Promise<Record<string, UserProblemStatus>>
@@ -54,7 +54,7 @@ export async function fetchAll(logger: LogFunc): Promise<Record<string, UserProb
             }
 
             // logger(`Fetching ${key} all...`)
-            const accounts = targets.filter(target => Object.hasOwn(target.accounts, key)).map(target => target.accounts[key as TentacleID]);
+            const accounts = targets.filter(target => Object.hasOwn(target.accounts, key)).map(target => target.accounts[key as TentacleID]!);
             const statuses = await impl.batchFetch!(accounts, logger);
             for(const [account, status] of Array.from(statuses))
             {

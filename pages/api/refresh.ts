@@ -5,7 +5,7 @@ import { getNewTimedLogger } from "../../utils/utils";
 
 export default async function handler(
     request: NextApiRequest,
-    response: NextApiResponse,
+    response: NextApiResponse
 )
 {
     const logger = getNewTimedLogger();

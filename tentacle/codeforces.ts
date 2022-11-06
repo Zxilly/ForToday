@@ -1,11 +1,11 @@
-import { UserProblemStatus, Tentacle, Problem, TentacleID } from "../types/tentacle";
+import { Problem, Tentacle, TentacleID, UserProblemStatus } from "../types/tentacle";
 import { JSDOM } from "jsdom";
 import { CODEFORCES_GROUP_ID } from "../constants";
 import { isValidDate, LogFunc } from "../utils/utils";
 
 export class CodeforcesTentacle implements Tentacle
 {
-    async fetch(account: string, logger: LogFunc): Promise<UserProblemStatus>
+    async fetch(account: string, _logger: LogFunc): Promise<UserProblemStatus>
     {
         const passProblems = new Map<string, Problem>();
         const problems = new Array<Problem>();
@@ -51,11 +51,11 @@ export class CodeforcesTentacle implements Tentacle
             problems.push(problem);
         }
 
-        const failedProblems:Problem[] = [];
+        const failedProblems: Problem[] = [];
         const failedProblemsID = new Set<string>();
         for(const problem of problems)
         {
-            if(!passProblems.has(problem.id)&&!failedProblemsID.has(problem.id))
+            if(!passProblems.has(problem.id) && !failedProblemsID.has(problem.id))
             {
                 failedProblems.push(problem);
                 failedProblemsID.add(problem.id);
@@ -177,7 +177,7 @@ export class CodeforcesTentacle implements Tentacle
         await Promise.all(tasks);
 
         const result = new Map<string, UserProblemStatus>();
-        submitSuccess.forEach((problems, user)=>
+        submitSuccess.forEach((problems, user) =>
         {
             result.set(user, new UserProblemStatus(
                 Array.from(problems).map(id =>
