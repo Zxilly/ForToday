@@ -7,7 +7,7 @@ import React from "react";
 import { UserCard } from "../components/UserCard";
 
 export default function Home({
-    result,
+    result
 }: {
     result: Record<string, PureUserProblemStatus>;
 })
@@ -17,7 +17,7 @@ export default function Home({
             <Box m={6} p={6} borderWidth="1px" borderRadius="lg">
                 <SimpleGrid columns={4} spacing={10}>
                     {Object.entries(result)
-                        .sort(([a], [b]) => a.localeCompare(b))
+                        .sort(([, st], [_, st2]) => (st.rank || -1) - (st2.rank || -1))
                         .map(([name, status]) =>
                         {
                             return UserCard({ name, status });
@@ -43,6 +43,6 @@ export async function getServerSideProps()
     return {
         props: {
             result
-        },
+        }
     };
 }
