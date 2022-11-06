@@ -123,11 +123,11 @@ export class CodeforcesTentacle implements Tentacle
             {
                 const url = `https://codeforces.com/group/${CODEFORCES_GROUP_ID}/contest/${contestIds[j]}/status`;
 
-                const tasks: Promise<void>[] = [];
+                const singlePageTasks: Promise<void>[] = [];
 
-                for(let i = 1; i <= 2; i++)
+                for(let i = 1; i <= 3; i++)
                 {
-                    const task = async () =>
+                    const singlePageTask = async () =>
                     {
                         const response = await fetch(`${url}/page/${i}`).then((res) => res.text());
                         logger(`Fetched Codeforces contest ${contestNames[j]} submissions page ${i}.`);
@@ -160,7 +160,7 @@ export class CodeforcesTentacle implements Tentacle
                             const date = new Date(timeStr);
                             if(!isValidDate(date)) return;
 
-                            const submitUser = $(cells.children().eq(2)).text()?.trim().replaceAll("\n", "");
+                            const submitUser = $(cells.children().eq(2)).text()?.trim().replaceAll("\n", "").trim();
                             if(!submitUser) return;
                             if(!accounts.includes(submitUser)) return;
 
@@ -168,7 +168,6 @@ export class CodeforcesTentacle implements Tentacle
                             if(!problemID) return;
                             const contestName = contestNames[j];
                             const name = `${problemID}`;
-                            const id = `${contestName}${name}`;
 
                             const url = cells.children().eq(3).eq(0).attr("href");
                             if(!url) return;
@@ -179,20 +178,20 @@ export class CodeforcesTentacle implements Tentacle
                                 url: `https://codeforces.com${url}` ?? "",
                                 title: name,
                                 contest: contestName,
-                                id: id
+                                id: url
                             };
-                            if(status.length !== 0) submitSuccessIdsMap.get(submitUser)?.add(problem.id);
-                            submitMap.get(submitUser)?.push(problem);
+                            if(status.length !== 0) submitSuccessIdsMap.get(submitUser)!.add(problem.id);
+                            submitMap.get(submitUser)!.push(problem);
                         });
                     };
-                    tasks.push(task());
+                    singlePageTasks.push(singlePageTask());
                 }
-                await Promise.all(tasks);
+                await Promise.all(singlePageTasks);
                 for(const [user, problems] of Array.from(submitMap))
                 {
                     const userSuccessIds = submitSuccessIdsMap.get(user)!;
                     const userFailedIds = submitFailedIdsMap.get(user)!;
-                    for(const problem of Array.from(problems))
+                    for(const problem of problems)
                     {
                         if(!userSuccessIds.has(problem.id))
                         {
