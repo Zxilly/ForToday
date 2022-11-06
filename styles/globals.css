@@ -10,3 +10,7 @@ body {
     align-items: center;
     min-height: 100%;
 }
+
+.codeStyle {
+    font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+}

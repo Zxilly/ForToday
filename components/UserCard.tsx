@@ -16,7 +16,6 @@ export function UserCard(props: UserCardProps): JSX.Element
         <Box
             padding={4}
             key={name}
-            maxW="sm"
             borderWidth="3px"
             borderRadius="lg"
             borderColor={color}
@@ -91,6 +90,7 @@ function ProblemGroup({
                         <Link href={problem.url} isExternal>
                             <Box
                                 as="span"
+                                className={"codeStyle"}
                                 color={problem.success ? "green.500" : "red.500"}
                                 fontSize="1rem"
                             >

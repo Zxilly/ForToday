@@ -3,9 +3,11 @@
 import { Box, Container, SimpleGrid } from "@chakra-ui/react";
 import { client } from "../constants";
 import { PureUserProblemStatus, UserProblemStatus } from "../types/tentacle";
-import React from "react";
+import React, { useState } from "react";
 import { UserCard } from "../components/UserCard";
-import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+
+const updateInterval = 1000 * 15;
 
 export default function Home({
     result
@@ -17,46 +19,45 @@ export default function Home({
         .sort(([, st], [_, st2]) => (st.rank || -1) - (st2.rank || -1))
         .map(([name, status]) =>
         {
-            return <UserCard name={name} status={status}/>;
+            return <UserCard key={Math.random().toString()} name={name} status={status}/>;
         });
 
     // select 4 from cards
     const visibleCards = [];
 
-    const [start, setStart] = React.useState(0);
+    const [start, setStart] = useState(0);
     for(let i = start; i < start + 4; i++)
     {
         visibleCards.push(cards[i % cards.length]);
     }
 
-    async function update()
+    async function updateCard()
     {
         setStart((start + 4) % cards.length);
     }
 
-    setTimeout(() => update(), 10000);
+    setTimeout(updateCard, updateInterval);
 
     return (
-        <Container maxW="container.xl">
-            <Box m={6} p={6}>
-                <AnimatePresence exitBeforeEnter>
-                    <motion.div
-                        key={Math.random().toString()}
-                        initial={{ y: 10, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: -10, opacity: 0 }}
-                        transition={{ duration: 1 }}
-                    >
-                        <SimpleGrid columns={4} spacing={10}>
-                            <LayoutGroup>
+        <>
+            <Container maxW="container.xl">
+                <Box m={6} p={6}>
+                    <AnimatePresence exitBeforeEnter>
+                        <motion.div
+                            key={Math.random().toString()}
+                            initial={{ y: 10, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: -10, opacity: 0 }}
+                            transition={{ duration: 1 }}
+                        >
+                            <SimpleGrid columns={4} spacing={10}>
                                 {visibleCards}
-                            </LayoutGroup>
-                        </SimpleGrid>
-                    </motion.div>
-                </AnimatePresence>;
-
-            </Box>
-        </Container>
+                            </SimpleGrid>
+                        </motion.div>
+                    </AnimatePresence>
+                </Box>
+            </Container>
+        </>
     );
 }
 
