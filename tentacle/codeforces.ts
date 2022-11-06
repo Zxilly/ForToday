@@ -7,7 +7,7 @@ export class CodeforcesTentacle implements Tentacle
 {
     async fetch(account: string, _logger: LogFunc): Promise<UserProblemStatus>
     {
-        const passProblems = new Map<string, Problem>();
+        const passProblemIds = new Set<string>();
         const problems = new Array<Problem>();
 
         const resp = await fetch(`https://codeforces.com/submissions/${account}`).then(res => res.text());
@@ -47,23 +47,24 @@ export class CodeforcesTentacle implements Tentacle
                 url: `https://codeforces.com${url}` ?? ""
             };
 
-            if(status) passProblems.set(id, problem);
+            if(status) passProblemIds.add(id);
             problems.push(problem);
         }
 
-        const failedProblems: Problem[] = [];
-        const failedProblemsID = new Set<string>();
+        const failedProblemIds = new Set<string>();
         for(const problem of problems)
         {
-            if(!passProblems.has(problem.id) && !failedProblemsID.has(problem.id))
+            if(!passProblemIds.has(problem.id))
             {
-                failedProblems.push(problem);
-                failedProblemsID.add(problem.id);
+                failedProblemIds.add(problem.id);
             }
         }
 
+        const successProblems = problems.filter(problem => passProblemIds.has(problem.id));
+        const failedProblems = problems.filter(problem => failedProblemIds.has(problem.id));
+
         return new UserProblemStatus(
-            Array.from(passProblems.values()),
+            successProblems,
             failedProblems,
             problems.length
         );
@@ -71,15 +72,15 @@ export class CodeforcesTentacle implements Tentacle
 
     async batchFetch(accounts: string[], logger: LogFunc): Promise<Map<string, UserProblemStatus>>
     {
-        const submitSuccess = new Map<string, Set<string>>();
+        const submitSuccessIdsMap = new Map<string, Set<string>>();
         const submitMap = new Map<string, Array<Problem>>();
-        const submitFailedMap = new Map<string, Set<string>>();
+        const submitFailedIdsMap = new Map<string, Set<string>>();
 
         for(const target of accounts)
         {
-            submitSuccess.set(target, new Set<string>());
+            submitSuccessIdsMap.set(target, new Set<string>());
             submitMap.set(target, new Array<Problem>());
-            submitFailedMap.set(target, new Set<string>());
+            submitFailedIdsMap.set(target, new Set<string>());
         }
 
         // logger("Fetching Codeforces group submissions...")
@@ -158,9 +159,9 @@ export class CodeforcesTentacle implements Tentacle
                                 url: `https://codeforces.com${url}` ?? "",
                                 title: name,
                                 contest: contestName,
-                                id: id,
+                                id: id
                             };
-                            if(status) submitSuccess.get(submitUser)?.add(problem.id);
+                            if(status) submitSuccessIdsMap.get(submitUser)?.add(problem.id);
                             submitMap.get(submitUser)?.push(problem);
                         }
                     };
@@ -169,28 +170,20 @@ export class CodeforcesTentacle implements Tentacle
                 await Promise.all(tasks);
                 for(const [user, problems] of Array.from(submitMap))
                     for(const problem of Array.from(problems))
-                        if(!submitSuccess.get(user)?.has(problem.id))
-                            submitFailedMap.get(user)?.add(problem.id);
+                        if(!submitSuccessIdsMap.get(user)?.has(problem.id))
+                            submitFailedIdsMap.get(user)?.add(problem.id);
             };
             tasks.push(task());
         }
         await Promise.all(tasks);
 
         const result = new Map<string, UserProblemStatus>();
-        submitSuccess.forEach((problems, user) =>
+        for(const [user, problems] of Array.from(submitMap))
         {
-            result.set(user, new UserProblemStatus(
-                Array.from(problems).map(id =>
-                {
-                    return submitMap.get(user)!.find(problem => problem.id === id)!;
-                }),
-                Array.from(submitFailedMap.get(user) ?? new Set<string>()).map(id =>
-                {
-                    return submitMap.get(user)!.find(problem => problem.id === id)!;
-                }),
-                Array.from(submitMap.get(user) ?? []).length
-            ));
-        });
+            const successProblems = problems.filter(problem => submitSuccessIdsMap.get(user)?.has(problem.id));
+            const failedProblems = problems.filter(problem => submitFailedIdsMap.get(user)?.has(problem.id));
+            result.set(user, new UserProblemStatus(successProblems, failedProblems, problems.length));
+        }
         return result;
     }
 }
