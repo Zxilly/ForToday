@@ -26,13 +26,13 @@ export class NowcoderTentacle implements Tentacle
             const date = new Date(items.item(8).textContent ?? "");
             if(!isValidDate(date)) break;
             cnt++;
-            const info = items.item(1);
-            const url = info.getAttribute("href");
+            const info = items.item(1).querySelector("a");
+            const url = info?.getAttribute("href");
             const problem: Problem = {
                 id: url?.substring(url.lastIndexOf("/") + 1) ?? "Unknown",
                 platform: "nowcoder",
                 contest: "",
-                title: info.textContent ?? "",
+                title: info?.textContent ?? "",
                 url: `https://ac.nowcoder.com${url}`,
             };
             if(items.item(3).textContent === "100")
