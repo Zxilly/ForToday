@@ -1,8 +1,10 @@
-import moment from "moment";
+import moment from "moment-timezone";
 
 export function isValidDate(d: Date)
 {
-    return moment(d).isAfter(moment().endOf("day").subtract(3, "days"));
+    const current = moment(d).tz("Asia/Shanghai");
+    const before = moment().tz("Asia/Shanghai").endOf("day").subtract(3, "days");
+    return current.isAfter(before);
 }
 
 export function groupBy<T>(array: Array<T>, f: (arg: T) => unknown)
