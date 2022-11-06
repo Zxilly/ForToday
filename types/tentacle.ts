@@ -20,12 +20,14 @@ export class UserProblemStatus
     pass: Problem[];
     failed: Problem[];
     submitted: number;
+    rank?: number = -1;
 
-    constructor(pass: Problem[], failed: Problem[], submitted: number)
+    constructor(pass: Problem[], failed: Problem[], submitted: number, rank = -1)
     {
         this.pass = pass;
         this.failed = failed;
         this.submitted = submitted;
+        this.rank = rank;
     }
 
 
@@ -54,6 +56,7 @@ export class UserProblemStatus
         const pass: Set<Problem> = new Set();
         const failed: Set<Problem> = new Set();
         let submitted = 0;
+        let rank = -1;
         for(const status of statuses)
         {
             for(const problem of status.pass)
@@ -65,8 +68,12 @@ export class UserProblemStatus
                 failed.add(problem);
             }
             submitted += status.submitted;
+            if(status.rank !== undefined && status.rank > 0)
+            {
+                rank = status.rank;
+            }
         }
-        return new UserProblemStatus(Array.from(pass), Array.from(failed), submitted);
+        return new UserProblemStatus(Array.from(pass), Array.from(failed), submitted, rank);
     }
 }
 

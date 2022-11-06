@@ -1,5 +1,5 @@
 import { Box, Link } from "@chakra-ui/react";
-import { groupBy } from "../utils/utils";
+import { groupBy, rankColor } from "../utils/utils";
 import { PureUserProblemStatus, SuccessProblem, UserProblemStatus, } from "../types/tentacle";
 import React from "react";
 import MD5 from "crypto-js/md5";
@@ -28,6 +28,7 @@ export function UserCard(props: UserCardProps): JSX.Element
                 as="h1"
                 lineHeight="tight"
                 noOfLines={1}
+                color={status.rank && status.rank > 0 ? rankColor(status.rank) : "gray.500"}
             >
                 {name}
             </Box>

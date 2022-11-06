@@ -1,7 +1,7 @@
 import { Problem, Tentacle, TentacleID, UserProblemStatus } from "../types/tentacle";
 import { load } from "cheerio";
 import { CODEFORCES_GROUP_ID } from "../constants";
-import { isValidDate, LogFunc } from "../utils/utils";
+import { isValidDate, LogFunc, rankParse } from "../utils/utils";
 
 export class CodeforcesTentacle implements Tentacle
 {
@@ -9,6 +9,13 @@ export class CodeforcesTentacle implements Tentacle
     {
         const passProblemIds = new Set<string>();
         const problems = new Array<Problem>();
+
+        const rankResp = await fetch(`https://codeforces.com/profile/${account}`).then(res => res.text());
+        const rankDom = load(rankResp);
+        const rank = rankDom(".info").find("li").eq(0).find("span").eq(0).text();
+        const rankNum = parseInt(rank, 10);
+        const rankResult = rankParse(rankNum);
+
 
         const resp = await fetch(`https://codeforces.com/submissions/${account}`).then(res => res.text());
         const dom = load(resp);
@@ -68,7 +75,8 @@ export class CodeforcesTentacle implements Tentacle
         return new UserProblemStatus(
             successProblems,
             failedProblems,
-            problems.length
+            problems.length,
+            rankResult
         );
     }
 
