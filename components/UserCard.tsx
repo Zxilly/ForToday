@@ -1,8 +1,7 @@
 import { Box, Link } from "@chakra-ui/react";
 import { groupBy, rankColor } from "../utils/utils";
-import { PureUserProblemStatus, SuccessProblem, UserProblemStatus, } from "../types/tentacle";
+import { PureUserProblemStatus, SuccessProblem, UserProblemStatus } from "../types/tentacle";
 import React from "react";
-import MD5 from "crypto-js/md5";
 
 export type UserCardProps = {
     name: string;
@@ -12,13 +11,15 @@ export type UserCardProps = {
 export function UserCard(props: UserCardProps): JSX.Element
 {
     const { name, status } = props;
+    const color = status.rank !== undefined && status.rank >= 0 ? rankColor(status.rank) : "black";
     return (
         <Box
             padding={4}
             key={name}
             maxW="sm"
-            borderWidth="1px"
+            borderWidth="3px"
             borderRadius="lg"
+            borderColor={color}
             overflow="hidden"
         >
             <Box
@@ -28,7 +29,7 @@ export function UserCard(props: UserCardProps): JSX.Element
                 as="h1"
                 lineHeight="tight"
                 noOfLines={1}
-                color={status.rank && status.rank > 0 ? rankColor(status.rank) : "gray.500"}
+                color={color}
             >
                 {name}
             </Box>
@@ -51,7 +52,7 @@ export function UserCard(props: UserCardProps): JSX.Element
                 ).map((group) =>
                 {
                     return (
-                        <ProblemGroup key={Math.random().toString()} problems={group}/>
+                        <ProblemGroup key={Math.random().toString()} problems={group} />
                     );
                 })}
             </Box>
@@ -60,7 +61,7 @@ export function UserCard(props: UserCardProps): JSX.Element
 }
 
 function ProblemGroup({
-    problems,
+    problems
 }: {
     problems: SuccessProblem[];
 }): JSX.Element
@@ -83,7 +84,7 @@ function ProblemGroup({
             {problems.map((problem) =>
             {
                 return (
-                    <div key={MD5(problem.id).toString()}>
+                    <div key={Math.random().toString()}>
                         <Link href={problem.url} isExternal>
                             <Box
                                 as="span"

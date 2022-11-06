@@ -16,7 +16,6 @@ export class CodeforcesTentacle implements Tentacle
         const rankNum = parseInt(rank, 10);
         const rankResult = rankParse(rankNum);
 
-
         const resp = await fetch(`https://codeforces.com/submissions/${account}`).then(res => res.text());
         const dom = load(resp);
 

@@ -34,7 +34,7 @@ export class UserProblemStatus
     // eslint-disable-next-line @typescript-eslint/ban-types
     public static fromObject(obj: PureUserProblemStatus): UserProblemStatus
     {
-        return new UserProblemStatus(obj.pass, obj.failed, obj.submitted);
+        return new UserProblemStatus(obj.pass, obj.failed, obj.submitted, obj.rank);
     }
 
     public getAll(): SuccessProblem[]
@@ -68,7 +68,7 @@ export class UserProblemStatus
                 failed.add(problem);
             }
             submitted += status.submitted;
-            if(status.rank !== undefined && status.rank > 0)
+            if(status.rank !== undefined && status.rank >= 0)
             {
                 rank = status.rank;
             }

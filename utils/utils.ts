@@ -31,7 +31,11 @@ export function getNewTimedLogger(): LogFunc
 
 export function rankParse(rank: number)
 {
-    if(rank < 1200)
+    if(rank <= 0)
+    {
+        return -1;
+    }
+    else if(rank < 1200)
     {
         return 0;
     }
