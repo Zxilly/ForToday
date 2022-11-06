@@ -9,13 +9,14 @@ export default async function handler(
 )
 {
     const logger = getNewTimedLogger();
-    logger("Adding lock...");
-    const lock = await client.setnx("lock", "1");
-    if(!lock)
-    {
-        response.status(200).json({ message: "locked" });
-        return;
-    }
+    // logger("Adding lock...");
+    // const lock = await client.setnx("lock", "1");
+    // if(!lock)
+    // {
+    //     logger("Lock exists, aborting...");
+    //     response.status(200).json({ message: "locked" });
+    //     return;
+    // }
     await client.expire("lock", 15);
     logger("Lock added.");
 

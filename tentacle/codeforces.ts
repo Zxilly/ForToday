@@ -1,5 +1,5 @@
 import { Problem, Tentacle, TentacleID, UserProblemStatus } from "../types/tentacle";
-import { JSDOM } from "jsdom";
+import { load } from "cheerio";
 import { CODEFORCES_GROUP_ID } from "../constants";
 import { isValidDate, LogFunc } from "../utils/utils";
 
@@ -11,32 +11,34 @@ export class CodeforcesTentacle implements Tentacle
         const problems = new Array<Problem>();
 
         const resp = await fetch(`https://codeforces.com/submissions/${account}`).then(res => res.text());
-        const dom = new JSDOM(resp).window.document;
+        const dom = load(resp);
 
-        const table = dom.querySelector("table.status-frame-datatable");
+        // const table = dom.querySelector("table.status-frame-datatable");
+        const table = dom("table.status-frame-datatable");
         if(table === null) return new UserProblemStatus([], [], 0);
-        const rows = table.querySelectorAll("tr:not(.first-row)");
-        for(const row of Array.from(rows))
+        const rows = table.find("tr:not(.first-row)");
+        rows.each((_, row) =>
         {
-            const cells = row.querySelectorAll("td");
-            const time = row.querySelector("span.format-time");
-            if(!time) continue;
-            const timeStr = time.textContent?.trim();
-            if(!timeStr) continue;
+            const cells = dom(row).find("td");
+            const time = dom(cells).find("span.format-time");
+            if(!time.length) return;
+            const timeStr = time.text()?.trim();
+            if(!timeStr.length) return;
             const date = new Date(timeStr);
-            if(!isValidDate(date)) continue;
-            const problemName = cells[3].textContent?.trim();
-            if(!problemName) continue;
-            const url = cells[3]?.querySelector("a")?.href;
-            if(!url) continue;
+            if(!isValidDate(date)) return;
+            const problemName = dom(cells[3]).text()?.trim();
+            if(!problemName.length) return;
+            const url = dom(cells[3]).find("a").attr("href");
+            if(!url) return;
             const problemRE = new RegExp("\\/contest\\/(?<contest>\\d*)\\/problem/.*");
             const match = url.match(problemRE);
-            if(!match) continue;
+            if(!match) return;
             const contest = match.groups?.contest;
-            if(!contest) continue;
+            if(!contest) return;
             const name = `${problemName}`;
 
-            const status = row.querySelector("span.verdict-accepted");
+            // const status = row.querySelector("span.verdict-accepted");
+            const status = dom(row).find("span.verdict-accepted");
 
             const id = `${contest}${name}`;
             const problem = {
@@ -47,9 +49,9 @@ export class CodeforcesTentacle implements Tentacle
                 url: `https://codeforces.com${url}` ?? ""
             };
 
-            if(status) passProblemIds.add(id);
+            if(status.length !== 0) passProblemIds.add(id);
             problems.push(problem);
-        }
+        });
 
         const failedProblemIds = new Set<string>();
         for(const problem of problems)
@@ -60,8 +62,8 @@ export class CodeforcesTentacle implements Tentacle
             }
         }
 
-        const successProblems = problems.filter(problem => passProblemIds.has(problem.id));
-        const failedProblems = problems.filter(problem => failedProblemIds.has(problem.id));
+        const successProblems = Array.from(passProblemIds).map(id => problems.find(problem => problem.id === id)!);
+        const failedProblems = Array.from(failedProblemIds).map(id => problems.find(problem => problem.id === id)!);
 
         return new UserProblemStatus(
             successProblems,
@@ -86,19 +88,26 @@ export class CodeforcesTentacle implements Tentacle
         // logger("Fetching Codeforces group submissions...")
         const res = await fetch(`https://codeforces.com/group/${CODEFORCES_GROUP_ID}/contests`).then(res => res.text());
         logger("Fetched Codeforces group submissions");
-        const dom = new JSDOM(res).window.document;
+        const dom = load(res);
 
-        const trs = Array.from(dom.querySelectorAll("tr[data-contestId]"));
-        const contestIds = trs.map(tr => tr.getAttribute("data-contestId"));
-        const contestNames = trs.map(tr => tr
-            .querySelectorAll("td")[0]
-            ?.textContent
-            ?.split("\n")
-            ?.filter(value =>
-            {
-                // not all blank
-                return value && value.trim();
-            })[0].trim() ?? "");
+
+        const trs = dom("tr[data-contestId]");
+        const contestIds: string[] = [];
+        trs.each((_, tr) =>
+        {
+            const contestId = dom(tr).attr("data-contestid");
+            if(contestId) contestIds.push(contestId);
+        });
+        const contestNames = trs.map((_, tr) =>
+        {
+            return dom(tr)
+                .children("td")
+                .eq(0)
+                .text()
+                .split("\n")
+                .map(s => s.trim())
+                .filter(s => s.length > 0)[0];
+        });
 
         const tasks = new Array<Promise<void>>();
         for(let j = 0; j < contestIds.length; j++)
@@ -108,52 +117,56 @@ export class CodeforcesTentacle implements Tentacle
                 const url = `https://codeforces.com/group/${CODEFORCES_GROUP_ID}/contest/${contestIds[j]}/status`;
 
                 const tasks: Promise<void>[] = [];
-                for(let i = 1; i <= 3; i++)
+
+                for(let i = 1; i <= 2; i++)
                 {
                     const task = async () =>
                     {
-                        // logger(`Fetching Codeforces contest ${contestNames[j]} submissions page ${i}...`)
                         const response = await fetch(`${url}/page/${i}`).then((res) => res.text());
                         logger(`Fetched Codeforces contest ${contestNames[j]} submissions page ${i}.`);
-                        const doc = new JSDOM(response).window.document;
+                        const $ = load(response);
+                        // logger(`Parsed Codeforces contest ${contestNames[j]} submissions page ${i}.`);
 
-                        const pageIndex = doc.querySelector("span.page-index.active");
-                        if(!pageIndex) return;
-                        const index = pageIndex.getAttribute("pageIndex");
-                        if(!index) return;
+                        const pageIndex = $("span.page-index.active");
+                        if(!pageIndex.length)
+                        {
+                            if(i !== 1) return;
+                        }
+                        const index = pageIndex.eq(0).attr("pageindex");
+                        if(!index || index === "") return;
                         if(parseInt(index) !== i)
                         {
                             logger(`Codeforces contest ${contestNames[j]} submissions page ${i} is not valid.`);
                             return;
                         }
 
-                        const table = doc.querySelector("table.status-frame-datatable");
+                        const table = $("table.status-frame-datatable");
                         if(table === null) return;
-                        const rows = table.querySelectorAll("tr:not(.first-row)");
-                        for(const row of Array.from(rows))
+                        const rows = table.find("tr:not(.first-row)");
+                        rows.each((_, row) =>
                         {
-                            const cells = row.querySelectorAll("td");
-                            const time = row.querySelector("span.format-time");
-                            if(!time) continue;
-                            const timeStr = time.textContent?.trim();
-                            if(!timeStr) continue;
+                            const cells = $(row).find("td");
+                            const time = $(cells).find("span.format-time");
+                            if(!time.length) return;
+                            const timeStr = time.text()?.trim();
+                            if(!timeStr) return;
                             const date = new Date(timeStr);
-                            if(!isValidDate(date)) continue;
+                            if(!isValidDate(date)) return;
 
-                            const submitUser = cells[2].textContent?.trim().replaceAll("\n", "");
-                            if(!submitUser) continue;
-                            if(!accounts.includes(submitUser)) continue;
+                            const submitUser = $(cells.children().eq(2)).text()?.trim().replaceAll("\n", "");
+                            if(!submitUser) return;
+                            if(!accounts.includes(submitUser)) return;
 
-                            const problemID = cells[3].textContent?.trim().replaceAll("\n", "");
-                            if(!problemID) continue;
+                            const problemID = $(cells.children().eq(3)).text()?.trim();
+                            if(!problemID) return;
                             const contestName = contestNames[j];
                             const name = `${problemID}`;
                             const id = `${contestName}${name}`;
 
-                            const url = cells[3]?.querySelector("a")?.href;
-                            if(!url) continue;
+                            const url = cells.children().eq(3).eq(0).attr("href");
+                            if(!url) return;
 
-                            const status = row.querySelector("span.verdict-accepted");
+                            const status = $(row).find("span.verdict-accepted");
                             const problem = {
                                 platform: "codeforces" as TentacleID,
                                 url: `https://codeforces.com${url}` ?? "",
@@ -161,9 +174,9 @@ export class CodeforcesTentacle implements Tentacle
                                 contest: contestName,
                                 id: id
                             };
-                            if(status) submitSuccessIdsMap.get(submitUser)?.add(problem.id);
+                            if(status.length !== 0) submitSuccessIdsMap.get(submitUser)?.add(problem.id);
                             submitMap.get(submitUser)?.push(problem);
-                        }
+                        });
                     };
                     tasks.push(task());
                 }
@@ -180,8 +193,9 @@ export class CodeforcesTentacle implements Tentacle
         const result = new Map<string, UserProblemStatus>();
         for(const [user, problems] of Array.from(submitMap))
         {
-            const successProblems = problems.filter(problem => submitSuccessIdsMap.get(user)?.has(problem.id));
-            const failedProblems = problems.filter(problem => submitFailedIdsMap.get(user)?.has(problem.id));
+
+            const successProblems = Array.from(submitSuccessIdsMap.get(user)!).map(id => problems.find(problem => problem.id === id)!);
+            const failedProblems = Array.from(submitFailedIdsMap.get(user)!).map(id => problems.find(problem => problem.id === id)!);
             result.set(user, new UserProblemStatus(successProblems, failedProblems, problems.length));
         }
         return result;

@@ -1,6 +1,6 @@
 import { Problem, Tentacle, UserProblemStatus } from "../types/tentacle";
 import { isValidDate, LogFunc } from "../utils/utils";
-import { JSDOM } from "jsdom";
+import { load } from "cheerio";
 
 export class NowcoderTentacle implements Tentacle
 {
@@ -8,11 +8,11 @@ export class NowcoderTentacle implements Tentacle
     {
         const res = await fetch(
             `https://ac.nowcoder.com/acm/contest/profile/${account}/practice-coding?pageSize=200`
-        );
-        const dom = new JSDOM(await res.text()).window.document;
-        const table = dom.querySelector("table.table-hover");
-        const tbody = table?.querySelector("tbody");
-        const rows = tbody?.querySelectorAll("tr");
+        ).then(res => res.text());
+        const dom = load(res);
+        const table = dom("table.table-hover");
+        const tbody = table?.find("tbody");
+        const rows = tbody?.find("tr");
         if(rows === undefined || rows.length === 1)
             return new UserProblemStatus([], [], 0);
         const passProblems: Problem[] = [];
@@ -22,20 +22,20 @@ export class NowcoderTentacle implements Tentacle
         let cnt = 0;
         for(const row of Array.from(rows))
         {
-            const items = row.querySelectorAll("td");
-            const date = new Date(items.item(8).textContent ?? "");
+            const items = dom(row).find("td");
+            const date = new Date(dom(items.eq(8)).text() ?? "");
             if(!isValidDate(date)) break;
             cnt++;
-            const info = items.item(1);
-            const url = info.getAttribute("href");
+            const info = items.eq(1);
+            const url = info.attr("href");
             const problem: Problem = {
                 id: url?.substring(url.lastIndexOf("/") + 1) ?? "Unknown",
                 platform: "nowcoder",
                 contest: "",
-                title: info.textContent ?? "",
+                title: info.text() ?? "",
                 url: `https://ac.nowcoder.com${url}`,
             };
-            if(items.item(3).textContent === "100")
+            if(items.eq(3).text().trim() === "100")
             {
                 if(!passProblemsID.has(problem.id))
                 {
