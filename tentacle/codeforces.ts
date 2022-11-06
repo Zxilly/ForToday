@@ -116,16 +116,16 @@ export class CodeforcesTentacle implements Tentacle
                 .filter(s => s.length > 0)[0];
         });
 
-        const tasks = new Array<Promise<void>>();
+        const contestTasks = new Array<Promise<void>>();
         for(let j = 0; j < contestIds.length; j++)
         {
-            const task = async () =>
+            const contestTask = async () =>
             {
                 const url = `https://codeforces.com/group/${CODEFORCES_GROUP_ID}/contest/${contestIds[j]}/status`;
 
                 const singlePageTasks: Promise<void>[] = [];
 
-                for(let i = 1; i <= 3; i++)
+                for(let i = 3; i >= 1; i--)
                 {
                     const singlePageTask = async () =>
                     {
@@ -178,34 +178,38 @@ export class CodeforcesTentacle implements Tentacle
                                 url: `https://codeforces.com${url}` ?? "",
                                 title: name,
                                 contest: contestName,
-                                id: url
+                                id: `${contestName}${name}`
                             };
-                            if(status.length !== 0) submitSuccessIdsMap.get(submitUser)!.add(problem.id);
-                            submitMap.get(submitUser)!.push(problem);
+
+                            const submitSuccessIds = submitSuccessIdsMap.get(submitUser)!;
+                            const submits = submitMap.get(submitUser)!;
+
+                            if(status.length !== 0) submitSuccessIds.add(problem.id);
+                            submits.push(problem);
                         });
+                        console.log(`Codeforces contest ${contestNames[j]} submissions page ${i} is valid.`);
                     };
                     singlePageTasks.push(singlePageTask());
                 }
                 await Promise.all(singlePageTasks);
-                for(const [user, problems] of Array.from(submitMap))
-                {
-                    const userSuccessIds = submitSuccessIdsMap.get(user)!;
-                    const userFailedIds = submitFailedIdsMap.get(user)!;
-                    for(const problem of problems)
-                    {
-                        if(!userSuccessIds.has(problem.id))
-                        {
-                            if(!userFailedIds.has(problem.id))
-                            {
-                                userFailedIds.add(problem.id);
-                            }
-                        }
-                    }
-                }
             };
-            tasks.push(task());
+            contestTasks.push(contestTask());
         }
-        await Promise.all(tasks);
+        await Promise.all(contestTasks);
+
+        for(const account of accounts)
+        {
+            const submitSuccessIds = submitSuccessIdsMap.get(account)!;
+            const submits = submitMap.get(account)!;
+
+            for(const problem of submits)
+            {
+                if(!submitSuccessIds.has(problem.id))
+                {
+                    submitFailedIdsMap.get(account)!.add(problem.id);
+                }
+            }
+        }
 
         const result = new Map<string, UserProblemStatus>();
         for(const [user, problems] of Array.from(submitMap))
