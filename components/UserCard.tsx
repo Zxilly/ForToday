@@ -21,6 +21,9 @@ export function UserCard(props: UserCardProps): JSX.Element
             borderRadius="lg"
             borderColor={color}
             overflow="hidden"
+            style={{
+                background: `linear-gradient(250deg, ${color} 2rem, var(--chakra-colors-chakra-body-bg) 0)`
+            }}
         >
             <Box
                 mt="1"
@@ -52,7 +55,7 @@ export function UserCard(props: UserCardProps): JSX.Element
                 ).map((group) =>
                 {
                     return (
-                        <ProblemGroup key={Math.random().toString()} problems={group} />
+                        <ProblemGroup key={Math.random().toString()} problems={group}/>
                     );
                 })}
             </Box>
@@ -78,7 +81,7 @@ function ProblemGroup({
                 <Box
                     as="span"
                     color={"gray.500"}
-                    fontSize="0.5rem"
+                    fontSize="0.85rem"
                 >{`${problems[0].platform} ${problems[0].contest}`}</Box>
             </div>
             {problems.map((problem) =>

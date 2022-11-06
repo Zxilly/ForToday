@@ -20,13 +20,13 @@ export class NowcoderTentacle implements Tentacle
         const failedProblems: Problem[] = [];
         const failedProblemsID = new Set<string>();
         let cnt = 0;
-        for(const row of Array.from(rows))
+        rows.each((i, row) =>
         {
             const items = dom(row).find("td");
             const date = new Date(dom(items.eq(8)).text() ?? "");
-            if(!isValidDate(date)) break;
+            if(!isValidDate(date)) return;
             cnt++;
-            const info = items.eq(1);
+            const info = dom(items.eq(1)).find("a");
             const url = info.attr("href");
             const problem: Problem = {
                 id: url?.substring(url.lastIndexOf("/") + 1) ?? "Unknown",
@@ -51,7 +51,7 @@ export class NowcoderTentacle implements Tentacle
                     failedProblemsID.add(problem.id);
                 }
             }
-        }
+        });
         return new UserProblemStatus(passProblems, failedProblems, cnt);
     }
 }

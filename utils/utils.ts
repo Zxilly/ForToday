@@ -14,7 +14,9 @@ export function groupBy<T>(array: Array<T>, f: (arg: T) => unknown)
         groups[group] = groups[group] || [];
         groups[group].push(o);
     });
-    return Object.keys(groups).map((group) => groups[group]);
+    return Object.keys(groups)
+        .sort((a, b) => a.localeCompare(b))
+        .map((group) => groups[group]);
 }
 
 export type LogFunc = (message: string) => void;
