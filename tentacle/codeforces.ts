@@ -189,9 +189,17 @@ export class CodeforcesTentacle implements Tentacle
                 }
                 await Promise.all(tasks);
                 for(const [user, problems] of Array.from(submitMap))
+                {
+                    const userSuccessIds = submitSuccessIdsMap.get(user)!;
+                    const userFailedIds = submitFailedIdsMap.get(user)!;
                     for(const problem of Array.from(problems))
-                        if(!submitSuccessIdsMap.get(user)?.has(problem.id))
-                            submitFailedIdsMap.get(user)?.add(problem.id);
+                    {
+                        if(!userSuccessIds.has(problem.id))
+                        {
+                            userFailedIds.add(problem.id);
+                        }
+                    }
+                }
             };
             tasks.push(task());
         }
