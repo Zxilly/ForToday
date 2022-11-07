@@ -21,7 +21,6 @@ export default function Home({
     const [start, setStart] = useState(0);
     const { width } = useWindowSize();
 
-    console.log(Math.min(width, 1280));
     const visibleCardCount = Math.floor(Math.min(width, 1280) / 300) ;
     const updateInterval = 1000 * 4 * visibleCardCount;
 
