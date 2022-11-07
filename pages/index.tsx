@@ -3,7 +3,7 @@
 import { Box, Container, SimpleGrid } from "@chakra-ui/react";
 import { client } from "../constants";
 import { PureUserProblemStatus, UserProblemStatus } from "../types/tentacle";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { UserCard } from "../components/UserCard";
 import { AnimatePresence, motion } from "framer-motion";
 import { GetServerSideProps } from "next";
@@ -73,7 +73,7 @@ export default function Home({
 
 export const getServerSideProps: GetServerSideProps = async ({ res }) =>
 {
-    res.setHeader("Cache-Control", "public, s-maxage=5, stale-while-revalidate=300");
+    res.setHeader("Cache-Control", "public, s-maxage=15, stale-while-revalidate=60");
 
     const data = await client.get("data");
     if(!data)
