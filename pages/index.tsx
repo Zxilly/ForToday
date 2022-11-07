@@ -36,8 +36,8 @@ export default function Home({
 
     useEffect(() =>
     {
-        setInterval(() => setStart((start + 4) % cards.length), updateInterval);
-        setInterval(async () =>
+        const updateTimerID = setInterval(() => setStart((start + 4) % cards.length), updateInterval);
+        const fetchTimerID = setInterval(async () =>
         {
             const res = await fetch("/api/data");
             if(res.status === 200)
@@ -46,6 +46,12 @@ export default function Home({
                 setData(data);
             }
         }, updateInterval * 4);
+
+        return () =>
+        {
+            clearInterval(updateTimerID);
+            clearInterval(fetchTimerID);
+        };
     }, [cards.length, start]);
 
     return (
