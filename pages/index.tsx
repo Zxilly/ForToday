@@ -3,7 +3,7 @@
 import { Box, Container, SimpleGrid } from "@chakra-ui/react";
 import { client } from "../constants";
 import { PureUserProblemStatus, UserProblemStatus } from "../types/tentacle";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { UserCard } from "../components/UserCard";
 import { AnimatePresence, motion } from "framer-motion";
 import { GetServerSideProps } from "next";
@@ -16,14 +16,15 @@ export default function Home({
     result: Record<string, PureUserProblemStatus>;
 })
 {
-    const cards = Object.entries(result)
+    const [data, setData] = useState(result);
+
+    const cards = Object.entries(data)
         .sort(([, st], [_, st2]) => (st.rank || -1) - (st2.rank || -1))
         .map(([name, status]) =>
         {
             return <UserCard key={Math.random().toString()} name={name} status={status}/>;
         });
 
-    // select 4 from cards
     const visibleCards = [];
 
     const [start, setStart] = useState(0);
@@ -37,7 +38,20 @@ export default function Home({
         setStart((start + 4) % cards.length);
     }
 
-    setTimeout(updateCard, updateInterval);
+
+    useEffect(() =>
+    {
+        setInterval(updateCard, updateInterval);
+        setInterval(async () =>
+        {
+            const res = await fetch("/api/data");
+            if(res.status === 200)
+            {
+                const data = await res.json();
+                setData(data);
+            }
+        }, updateInterval * 4);
+    }, []);
 
     return (
         <>
