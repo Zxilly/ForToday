@@ -9,11 +9,14 @@ export default async function handler(
 {
     const logger = getNewTimedLogger();
     const data = await client.get("data");
-    if(data){
+    if(data)
+    {
         logger("Data exists, returning...");
         response.status(200).json(JSON.parse(data));
         return;
-    } else {
+    }
+    else
+    {
         logger("Data does not exist, aborting...");
         response.status(404).json({ message: "no data" });
         return;
