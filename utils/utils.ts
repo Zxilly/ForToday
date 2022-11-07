@@ -85,6 +85,8 @@ export function rankColor(rank: number)
 {
     switch (rank)
     {
+        case -1:
+            return "black";
         case 0:
             return "gray";
         case 1:

@@ -29,13 +29,6 @@
       "error",
       "double"
     ],
-    "brace-style": [
-      "error",
-      "allman",
-      {
-        "allowSingleLine": true
-      }
-    ],
     "semi": "error",
     "eol-last": "error",
     "no-trailing-spaces": "error",

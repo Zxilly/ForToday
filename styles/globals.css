@@ -14,3 +14,12 @@ body {
 .codeStyle {
     font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
 }
+
+.activeCardIndicator {
+    position: absolute;
+    top: 50%;
+    right: -1rem;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+}
