@@ -27,7 +27,7 @@ export default function Home({
     }, [width]);
     const updateInterval = useMemo(() =>
     {
-        return 1000 * 10 * visibleCardCount;
+        return 1000 * 5 * visibleCardCount;
     }, [visibleCardCount]);
 
     const sortedData = useMemo(() =>
@@ -62,7 +62,7 @@ export default function Home({
             const data = await res.json();
             setData(data);
         }
-    }, autoRefresh ? updateInterval : null);
+    }, autoRefresh ? updateInterval * 4 : null);
 
     useEffect(() =>
     {
