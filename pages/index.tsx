@@ -6,6 +6,7 @@ import { PureUserProblemStatus, UserProblemStatus } from "../types/tentacle";
 import React, { useState } from "react";
 import { UserCard } from "../components/UserCard";
 import { AnimatePresence, motion } from "framer-motion";
+import { GetServerSideProps } from "next";
 
 const updateInterval = 1000 * 15;
 
@@ -61,8 +62,10 @@ export default function Home({
     );
 }
 
-export async function getServerSideProps()
+export const getServerSideProps: GetServerSideProps = async ({ res }) =>
 {
+    res.setHeader("Cache-Control", "public, s-maxage=5, stale-while-revalidate=300");
+
     const data = await client.get("data");
     if(!data)
     {
@@ -78,4 +81,4 @@ export async function getServerSideProps()
             result
         }
     };
-}
+};
