@@ -21,7 +21,7 @@ export default function Home({
     const { width } = useWindowSize();
     const [autoRefresh, setAutoRefresh] = useBoolean(true);
 
-    const lastClick = useRef<Date>(new Date());
+    const lastClick = useRef<number>(Date.now() - 2000);
 
     const visibleCardCount = useMemo(() =>
     {
@@ -42,7 +42,7 @@ export default function Home({
     {
         return sortedData.map(([name, status]) =>
         {
-            return <UserCard key={Math.random().toString()} name={name} status={status}/>;
+            return <UserCard key={Math.random().toString()} name={name} status={status} />;
         });
     }, [sortedData]);
 
@@ -123,27 +123,28 @@ export default function Home({
 
     const goNext = useCallback(() =>
     {
-        const last = lastClick.current;
-        if(Date.now() - lastClick.current.getTime() >= 2000) {
+        if(Date.now() - lastClick.current >= 2000)
+        {
             setStart((start + visibleCardCount) % cards.length);
+            lastClick.current = Date.now();
         }
     }, [start, visibleCardCount, cards.length]);
 
     return (
         <>
             <Container maxW="container.xl">
-                {visibleCardCount === 4 && <Box className={"activeCardIndicator"}>
+                {visibleCardCount !== 1 && <Box className={"activeCardIndicator"}>
                     {/*{cardIndicator}*/}
                     <Stack direction={"column"} spacing={2}>
                         <IconButton
                             aria-label={"refresh"}
-                            icon={<RepeatIcon/>}
+                            icon={<RepeatIcon />}
                             variant={autoRefresh ? "solid" : "outline"}
                             onClick={toggleAutoRefresh}
                         />
                         <IconButton
                             aria-label={"next page"}
-                            icon={<TriangleDownIcon/>}
+                            icon={<TriangleDownIcon />}
                             onClick={goNext}
                         />
                     </Stack>
