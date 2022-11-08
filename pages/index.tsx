@@ -1,6 +1,6 @@
 // noinspection JSIgnoredPromiseFromCall
 
-import { Box, Container, IconButton, SimpleGrid, Stack, useToast } from "@chakra-ui/react";
+import { Box, Container, IconButton, SimpleGrid, Stack, Tooltip, useToast } from "@chakra-ui/react";
 import { client } from "../constants";
 import { PureUserProblemStatus, UserProblemStatus } from "../types/tentacle";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -96,17 +96,21 @@ export default function Home({
                     <Stack direction={"column"} spacing={6}>
                         <UpdateButton/>
                         <Stack direction={"column"} spacing={2}>
-                            <IconButton
-                                aria-label={"refresh"}
-                                icon={<RepeatIcon/>}
-                                variant={autoRefresh ? "solid" : "outline"}
-                                onClick={toggleAutoRefresh}
-                            />
-                            <IconButton
-                                aria-label={"next page"}
-                                icon={<TriangleDownIcon/>}
-                                onClick={goNext}
-                            />
+                            <Tooltip label="自动刷新" placement="right">
+                                <IconButton
+                                    aria-label={"refresh"}
+                                    icon={<RepeatIcon/>}
+                                    variant={autoRefresh ? "solid" : "outline"}
+                                    onClick={toggleAutoRefresh}
+                                />
+                            </Tooltip>
+                            <Tooltip label="下一页" placement="right">
+                                <IconButton
+                                    aria-label={"next page"}
+                                    icon={<TriangleDownIcon/>}
+                                    onClick={goNext}
+                                />
+                            </Tooltip>
                         </Stack>
                     </Stack>
                 </Box>}
@@ -156,27 +160,29 @@ const UpdateButton: React.FC = () =>
     const [loading, setLoading] = useState(false);
     const toast = useToast();
 
-    return <IconButton
-        aria-label={"update"}
-        icon={<SpinnerIcon/>}
-        isLoading={loading}
-        onClick={() =>
-        {
-            if(!loading)
+    return <Tooltip label="重新爬取" placement="right">
+        <IconButton
+            aria-label={"update"}
+            icon={<SpinnerIcon/>}
+            isLoading={loading}
+            onClick={() =>
             {
-                setLoading(true);
-                fetch("/api/refresh")
-                    .then(() =>
-                    {
-                        setLoading(false);
-                        toast({
-                            title: "更新成功",
-                            status: "success",
-                            duration: 2000,
-                            isClosable: false
+                if(!loading)
+                {
+                    setLoading(true);
+                    fetch("/api/refresh")
+                        .then(() =>
+                        {
+                            setLoading(false);
+                            toast({
+                                title: "更新成功",
+                                status: "success",
+                                duration: 2000,
+                                isClosable: false
+                            });
                         });
-                    });
-            }
-        }}
-    />;
+                }
+            }}
+        />
+    </Tooltip>;
 };
