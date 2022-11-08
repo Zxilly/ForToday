@@ -134,17 +134,20 @@ export class CodeforcesTentacle implements Tentacle
                         const $ = load(response);
                         // logger(`Parsed Codeforces contest ${contestNames[j]} submissions page ${i}.`);
 
-                        const pageIndex = $("span.page-index.active");
-                        if(!pageIndex.length)
+                        if(i !== 1)
                         {
-                            if(i !== 1) return;
-                        }
-                        const index = pageIndex.eq(0).attr("pageindex");
-                        if(!index || index === "") return;
-                        if(parseInt(index) !== i)
-                        {
-                            logger(`Codeforces contest ${contestNames[j]} submissions page ${i} is not valid.`);
-                            return;
+                            const pageIndex = $("span.page-index.active");
+                            if(!pageIndex.length)
+                            {
+                                return;
+                            }
+                            const index = pageIndex.eq(0).attr("pageindex");
+                            if(!index || index === "") return;
+                            if(parseInt(index) !== i)
+                            {
+                                logger(`Codeforces contest ${contestNames[j]} submissions page ${i} is not valid.`);
+                                return;
+                            }
                         }
 
                         const table = $("table.status-frame-datatable");
