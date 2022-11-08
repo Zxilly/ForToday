@@ -1,6 +1,6 @@
 // noinspection JSIgnoredPromiseFromCall
 
-import { Box, Container, IconButton, SimpleGrid, Stack } from "@chakra-ui/react";
+import { Box, Container, IconButton, SimpleGrid, Stack, useToast } from "@chakra-ui/react";
 import { client } from "../constants";
 import { PureUserProblemStatus, UserProblemStatus } from "../types/tentacle";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -8,7 +8,7 @@ import { UserCard } from "../components/UserCard";
 import { AnimatePresence, motion } from "framer-motion";
 import { GetServerSideProps } from "next";
 import { useBoolean, useInterval, useWindowSize } from "react-use";
-import { RepeatIcon, TriangleDownIcon } from "@chakra-ui/icons";
+import { RepeatIcon, SpinnerIcon, TriangleDownIcon } from "@chakra-ui/icons";
 
 export default function Home({
     result
@@ -42,7 +42,7 @@ export default function Home({
     {
         return sortedData.map(([name, status]) =>
         {
-            return <UserCard key={Math.random().toString()} name={name} status={status} />;
+            return <UserCard key={Math.random().toString()} name={name} status={status}/>;
         });
     }, [sortedData]);
 
@@ -75,47 +75,6 @@ export default function Home({
         return () => clearTimeout(timerID);
     }, [start, visibleCardCount, cards.length, updateInterval]);
 
-    // const cardIndicator = useMemo(() =>
-    // {
-    //     const _clips = [];
-    //     const shouldRenders = [];
-    //     const variants: Variants = {
-    //         "active": {
-    //             opacity: 1
-    //         },
-    //         "inactive": {
-    //             opacity: 0
-    //         }
-    //     };
-    //     for(let i = start; i < start + visibleCardCount; i++)
-    //     {
-    //         shouldRenders.push(i % cards.length);
-    //     }
-    //     for(let i = 0; i < cards.length; i++)
-    //     {
-    //         const shouldRender = shouldRenders.includes(i);
-    //         _clips.push(
-    //             <motion.div
-    //                 key={Math.random().toString()}
-    //                 layout
-    //                 variants={variants}
-    //                 animate={shouldRender ? "active" : "inactive"}
-    //                 transition={{ duration: 0.5 }}
-    //                 exit={{ opacity: 0, x: 0 }}
-    //             >
-    //                 <Box
-    //                     className={style.statusClip}
-    //                     background={"blue.200"}
-    //                 />
-    //             </motion.div>);
-    //     }
-    //     return <AnimatePresence>
-    //         <Box className={style.statusClipGroup}>
-    //             {_clips}
-    //         </Box>
-    //     </AnimatePresence>;
-    // }, [cards.length, start, visibleCardCount]);
-
     const toggleAutoRefresh = useCallback(() =>
     {
         setAutoRefresh(!autoRefresh);
@@ -134,19 +93,21 @@ export default function Home({
         <>
             <Container maxW="container.xl">
                 {visibleCardCount !== 1 && <Box className={"activeCardIndicator"}>
-                    {/*{cardIndicator}*/}
-                    <Stack direction={"column"} spacing={2}>
-                        <IconButton
-                            aria-label={"refresh"}
-                            icon={<RepeatIcon />}
-                            variant={autoRefresh ? "solid" : "outline"}
-                            onClick={toggleAutoRefresh}
-                        />
-                        <IconButton
-                            aria-label={"next page"}
-                            icon={<TriangleDownIcon />}
-                            onClick={goNext}
-                        />
+                    <Stack direction={"column"} spacing={6}>
+                        <UpdateButton/>
+                        <Stack direction={"column"} spacing={2}>
+                            <IconButton
+                                aria-label={"refresh"}
+                                icon={<RepeatIcon/>}
+                                variant={autoRefresh ? "solid" : "outline"}
+                                onClick={toggleAutoRefresh}
+                            />
+                            <IconButton
+                                aria-label={"next page"}
+                                icon={<TriangleDownIcon/>}
+                                onClick={goNext}
+                            />
+                        </Stack>
                     </Stack>
                 </Box>}
                 <Box m={6} p={6}>
@@ -188,4 +149,34 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) =>
             result
         }
     };
+};
+
+const UpdateButton: React.FC = () =>
+{
+    const [loading, setLoading] = useState(false);
+    const toast = useToast();
+
+    return <IconButton
+        aria-label={"update"}
+        icon={<SpinnerIcon/>}
+        isLoading={loading}
+        onClick={() =>
+        {
+            if(!loading)
+            {
+                setLoading(true);
+                fetch("/api/refresh")
+                    .then(() =>
+                    {
+                        setLoading(false);
+                        toast({
+                            title: "更新成功",
+                            status: "success",
+                            duration: 2000,
+                            isClosable: false
+                        });
+                    });
+            }
+        }}
+    />;
 };
