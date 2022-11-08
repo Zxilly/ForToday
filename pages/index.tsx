@@ -3,7 +3,7 @@
 import { Box, Container, IconButton, SimpleGrid, Stack } from "@chakra-ui/react";
 import { client } from "../constants";
 import { PureUserProblemStatus, UserProblemStatus } from "../types/tentacle";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { UserCard } from "../components/UserCard";
 import { AnimatePresence, motion } from "framer-motion";
 import { GetServerSideProps } from "next";
@@ -20,6 +20,8 @@ export default function Home({
     const [start, setStart] = useState(0);
     const { width } = useWindowSize();
     const [autoRefresh, setAutoRefresh] = useBoolean(true);
+
+    const lastClick = useRef<Date>(new Date());
 
     const visibleCardCount = useMemo(() =>
     {
@@ -121,7 +123,10 @@ export default function Home({
 
     const goNext = useCallback(() =>
     {
-        setStart((start + visibleCardCount) % cards.length);
+        const last = lastClick.current;
+        if(Date.now() - lastClick.current.getTime() >= 2000) {
+            setStart((start + visibleCardCount) % cards.length);
+        }
     }, [start, visibleCardCount, cards.length]);
 
     return (
