@@ -75,15 +75,22 @@ export class UserProblemStatus
         }
         return new UserProblemStatus(Array.from(pass), Array.from(failed), submitted, rank);
     }
+
+    static empty()
+    {
+        return new UserProblemStatus([], [], 0);
+    }
 }
 
 export interface Tentacle
 {
     fetch: (account: string, logger: LogFunc) => Promise<UserProblemStatus>;
     batchFetch?: (accounts: string[], logger: LogFunc) => Promise<Map<string, UserProblemStatus>>;
+
+    requireAuth?: (logger: LogFunc) => Promise<boolean>;
 }
 
-export type TentacleID = "codeforces" | "nowcoder"
+export type TentacleID = "codeforces" | "nowcoder" | "luogu"
 
 export interface Target
 {

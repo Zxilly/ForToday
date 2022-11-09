@@ -21,7 +21,7 @@ export class CodeforcesTentacle implements Tentacle
 
         // const table = dom.querySelector("table.status-frame-datatable");
         const table = dom("table.status-frame-datatable");
-        if(table === null) return new UserProblemStatus([], [], 0);
+        if(table === null) return UserProblemStatus.empty();
         const rows = table.find("tr:not(.first-row)");
         rows.each((_, row) =>
         {

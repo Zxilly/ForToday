@@ -37,7 +37,8 @@ export const targets: Target[] = [
         name: "AgOH",
         accounts: {
             codeforces: "AgOH",
-            nowcoder: "409383157"
+            nowcoder: "409383157",
+            luogu: "109757"
         }
     },
     {
@@ -49,7 +50,8 @@ export const targets: Target[] = [
     {
         name: "Zxilly",
         accounts: {
-            codeforces: "zxilly"
+            codeforces: "zxilly",
+            luogu: "38604"
         }
     }
 ];

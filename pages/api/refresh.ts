@@ -9,6 +9,13 @@ export default async function handler(
 )
 {
     const logger = getNewTimedLogger();
+
+    if(request.method !== "GET")
+    {
+        response.status(405).json({ message: "Method Not Allowed" });
+        return;
+    }
+
     logger("Adding lock...");
     const lock = await client.setnx("lock", "1");
     if(!lock)

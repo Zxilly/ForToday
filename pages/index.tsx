@@ -1,6 +1,12 @@
 // noinspection JSIgnoredPromiseFromCall
 
-import { Box, Container, IconButton, SimpleGrid, Stack, Tooltip, useToast } from "@chakra-ui/react";
+import {
+    Box, Container,
+    IconButton, SimpleGrid,
+    Stack,
+    Tooltip,
+    useToast
+} from "@chakra-ui/react";
 import { client } from "../constants";
 import { PureUserProblemStatus, UserProblemStatus } from "../types/tentacle";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -9,6 +15,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { GetServerSideProps } from "next";
 import { useBoolean, useInterval, useWindowSize } from "react-use";
 import { RepeatIcon, SpinnerIcon, TriangleDownIcon } from "@chakra-ui/icons";
+import TokenDialog from "../components/TokenDialog";
 
 export default function Home({
     result
@@ -91,6 +98,7 @@ export default function Home({
 
     return (
         <>
+            <TokenDialog/>
             <Container maxW="container.xl">
                 {visibleCardCount !== 1 && <Box className={"activeCardIndicator"}>
                     <Stack direction={"column"} spacing={6}>
@@ -186,3 +194,5 @@ const UpdateButton: React.FC = () =>
         />
     </Tooltip>;
 };
+
+

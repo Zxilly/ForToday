@@ -4,10 +4,12 @@ import { CodeforcesTentacle } from "./codeforces";
 import { targets } from "../constants";
 import { LogFunc } from "../utils/utils";
 import { NowcoderTentacle } from "./nowcoder";
+import { LuoguTentacle } from "./luogu";
 
 const tentaclesImpl: Record<TentacleID, Tentacle> = {
     codeforces: new CodeforcesTentacle(),
     nowcoder: new NowcoderTentacle(),
+    luogu: new LuoguTentacle(),
 };
 
 export async function fetchAll(logger: LogFunc): Promise<Record<string, UserProblemStatus>>
@@ -16,13 +18,21 @@ export async function fetchAll(logger: LogFunc): Promise<Record<string, UserProb
     const result: Record<string, UserProblemStatus> = {};
     for(const user of users)
     {
-        result[user] = new UserProblemStatus([], [], 0);
+        result[user] = UserProblemStatus.empty();
     }
 
     const tasks: Promise<void>[] = [];
     for(const [key, impl] of Object.entries(tentaclesImpl))
     {
-        // logger(`Fetching ${key}...`)
+        if(impl.requireAuth)
+        {
+            if(!await impl.requireAuth(logger))
+            {
+                logger(`Skip ${key} because of auth failed`);
+                continue;
+            }
+        }
+
         const task = async () =>
         {
             const subtasks: Promise<void>[] = [];
@@ -46,13 +56,22 @@ export async function fetchAll(logger: LogFunc): Promise<Record<string, UserProb
 
     for(const [key, impl] of Object.entries(tentaclesImpl))
     {
+        if(!(impl.batchFetch))
+        {
+            continue;
+        }
+
+        if(impl.requireAuth)
+        {
+            if(!await impl.requireAuth(logger))
+            {
+                logger(`Skip ${key} because of auth failed`);
+                continue;
+            }
+        }
+
         const task = async () =>
         {
-            if(!(impl.batchFetch))
-            {
-                return;
-            }
-
             // logger(`Fetching ${key} all...`)
             const accounts = targets.filter(target => Object.hasOwn(target.accounts, key)).map(target => target.accounts[key as TentacleID]!);
             const statuses = await impl.batchFetch!(accounts, logger);

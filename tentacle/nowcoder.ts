@@ -14,7 +14,7 @@ export class NowcoderTentacle implements Tentacle
         const tbody = table?.find("tbody");
         const rows = tbody?.find("tr");
         if(rows === undefined || rows.length === 1)
-            return new UserProblemStatus([], [], 0);
+            return UserProblemStatus.empty();
         const passProblems: Problem[] = [];
         const passProblemsID = new Set<string>();
         const failedProblems: Problem[] = [];

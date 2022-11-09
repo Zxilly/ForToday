@@ -8,6 +8,12 @@ export default async function handler(
 )
 {
     const logger = getNewTimedLogger();
+    if(request.method !== "GET")
+    {
+        response.status(405).json({ message: "Method Not Allowed" });
+        return;
+    }
+
     const data = await client.get("data");
     if(data)
     {
