@@ -21,15 +21,23 @@ export function groupBy<T>(array: Array<T>, f: (arg: T) => unknown)
         .map((group) => groups[group]);
 }
 
-export type LogFunc = (message: string) => void;
+export type LogFunc = (message: string) => string | void;
 
 export function getNewTimedLogger(): LogFunc
 {
     const last = Date.now();
+    const messages = new Array<string>();
     return function (msg: string)
     {
+        if(msg === "getResult")
+        {
+            return messages.join("\n");
+        }
+
         const now = Date.now();
-        console.log(`${msg} (${now - last}ms)`);
+        const msgt = `[${now - last}ms] ${msg}`;
+        console.log(msgt);
+        messages.push(msgt);
     };
 }
 

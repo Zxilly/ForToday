@@ -38,5 +38,6 @@ export default async function handler(
     logger("Lock removed.");
     response.status(200).json({
         time: new Date().getTime(),
+        log: logger("getResult")
     });
 }
