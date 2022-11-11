@@ -27,6 +27,7 @@ export default function Home({
     const [start, setStart] = useState(0);
     const { width } = useWindowSize();
     const [autoRefresh, setAutoRefresh] = useBoolean(true);
+    const toast = useToast();
 
     const lastClick = useRef<number>(Date.now() - 2000);
 
@@ -84,8 +85,26 @@ export default function Home({
 
     const toggleAutoRefresh = useCallback(() =>
     {
+        if(autoRefresh)
+        {
+            toast({
+                title: "自动刷新已关闭",
+                status: "warning",
+                duration: 2000,
+                isClosable: false,
+            });
+        }
+        else
+        {
+            toast({
+                title: "自动刷新已开启",
+                status: "success",
+                duration: 2000,
+                isClosable: false,
+            });
+        }
         setAutoRefresh(!autoRefresh);
-    }, [autoRefresh, setAutoRefresh]);
+    }, [autoRefresh, setAutoRefresh, toast]);
 
     const goNext = useCallback(() =>
     {
@@ -113,11 +132,7 @@ export default function Home({
                                 />
                             </Tooltip>
                             <Tooltip label="下一页" placement="right">
-                                <IconButton
-                                    aria-label={"next page"}
-                                    icon={<TriangleDownIcon/>}
-                                    onClick={goNext}
-                                />
+                                <NextPageButton onClick={goNext}/>
                             </Tooltip>
                         </Stack>
                     </Stack>
@@ -196,3 +211,19 @@ const UpdateButton: React.FC = () =>
 };
 
 
+const NextPageButton: React.FC<{ onClick: () => void }> = ({ onClick }) =>
+{
+    const [loading, setLoading] = useState(false);
+
+    return <IconButton
+        aria-label={"next page"}
+        icon={<TriangleDownIcon/>}
+        isLoading={loading}
+        onClick={() =>
+        {
+            setLoading(true);
+            onClick();
+            setTimeout(() => setLoading(false), 2000);
+        }}
+    />;
+};
