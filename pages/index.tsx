@@ -92,6 +92,7 @@ export default function Home({
                 status: "warning",
                 duration: 2000,
                 isClosable: false,
+                position: "top"
             });
         }
         else
@@ -101,6 +102,7 @@ export default function Home({
                 status: "success",
                 duration: 2000,
                 isClosable: false,
+                position: "top"
             });
         }
         setAutoRefresh(!autoRefresh);
@@ -201,7 +203,8 @@ const UpdateButton: React.FC = () =>
                                 title: "更新成功",
                                 status: "success",
                                 duration: 2000,
-                                isClosable: false
+                                isClosable: false,
+                                position: "top"
                             });
                         });
                 }

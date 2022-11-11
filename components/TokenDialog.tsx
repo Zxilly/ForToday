@@ -42,7 +42,8 @@ const TokenDialog: React.FC = () =>
                 title: "请填写完整",
                 status: "error",
                 duration: 2000,
-                isClosable: false
+                isClosable: false,
+                position: "top"
             });
             return;
         }
@@ -63,7 +64,8 @@ const TokenDialog: React.FC = () =>
                 title: "绑定成功",
                 status: "success",
                 duration: 2000,
-                isClosable: true
+                isClosable: true,
+                position: "top"
             });
             onClose();
         }
@@ -74,7 +76,8 @@ const TokenDialog: React.FC = () =>
                 description: "请检查 Uid 和 Client ID 是否正确",
                 status: "error",
                 duration: 2000,
-                isClosable: true
+                isClosable: true,
+                position: "top"
             });
         }
         setLoading(false);
