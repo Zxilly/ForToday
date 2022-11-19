@@ -186,7 +186,7 @@ const UpdateButton: React.FC = () =>
                 {
                     setLoading(true);
                     fetch("/api/refresh")
-                        .then(() =>
+                        .then((r) =>
                         {
                             setLoading(false);
                             toast({
@@ -194,6 +194,11 @@ const UpdateButton: React.FC = () =>
                                 status: "success",
                                 duration: 2000,
                                 position: "top"
+                            });
+
+                            r.json().then((data) =>
+                            {
+                                console.log(data.log);
                             });
                         });
                 }
