@@ -13,7 +13,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { UserCard } from "../components/UserCard";
 import { AnimatePresence, motion } from "framer-motion";
 import { GetServerSideProps } from "next";
-import { useBoolean, useInterval, useWindowSize } from "react-use";
+import { useInterval, useWindowSize } from "react-use";
 import { RepeatIcon, SpinnerIcon, TriangleDownIcon } from "@chakra-ui/icons";
 import TokenDialog from "../components/TokenDialog";
 
@@ -26,7 +26,6 @@ export default function Home({
     const [data, setData] = useState(result);
     const [start, setStart] = useState(0);
     const { width } = useWindowSize();
-    const [autoRefresh, setAutoRefresh] = useBoolean(true);
     const toast = useToast();
 
     const lastClick = useRef<number>(Date.now() - 2000);
@@ -64,7 +63,7 @@ export default function Home({
         return _cards;
     }, [start, visibleCardCount, cards]);
 
-    useInterval(async () =>
+    const refresh = useCallback(async () =>
     {
         const res = await fetch("/api/data");
         if(res.status === 200)
@@ -72,7 +71,12 @@ export default function Home({
             const data = await res.json();
             setData(data);
         }
-    }, autoRefresh ? updateInterval * 4 : null);
+    }, []);
+
+    useInterval(async () =>
+    {
+        await refresh();
+    }, updateInterval * 4);
 
     useEffect(() =>
     {
@@ -82,31 +86,6 @@ export default function Home({
         }, updateInterval);
         return () => clearTimeout(timerID);
     }, [start, visibleCardCount, cards.length, updateInterval]);
-
-    const toggleAutoRefresh = useCallback(() =>
-    {
-        if(autoRefresh)
-        {
-            toast({
-                title: "自动刷新已关闭",
-                status: "warning",
-                duration: 2000,
-                isClosable: false,
-                position: "top"
-            });
-        }
-        else
-        {
-            toast({
-                title: "自动刷新已开启",
-                status: "success",
-                duration: 2000,
-                isClosable: false,
-                position: "top"
-            });
-        }
-        setAutoRefresh(!autoRefresh);
-    }, [autoRefresh, setAutoRefresh, toast]);
 
     const goNext = useCallback(() =>
     {
@@ -125,12 +104,23 @@ export default function Home({
                     <Stack direction={"column"} spacing={6}>
                         <UpdateButton/>
                         <Stack direction={"column"} spacing={2}>
-                            <Tooltip label="自动刷新" placement="right">
+                            <Tooltip label="刷新" placement="right">
                                 <IconButton
                                     aria-label={"refresh"}
                                     icon={<RepeatIcon/>}
-                                    variant={autoRefresh ? "solid" : "outline"}
-                                    onClick={toggleAutoRefresh}
+                                    variant={"solid"}
+                                    onClick={async () =>
+                                    {
+                                        await refresh();
+                                        toast({
+                                            title: "刷新成功",
+                                            status: "success",
+                                            duration: 2000,
+                                            isClosable: true,
+                                            position: "top",
+
+                                        });
+                                    }}
                                 />
                             </Tooltip>
                             <Tooltip label="下一页" placement="right">
@@ -203,7 +193,6 @@ const UpdateButton: React.FC = () =>
                                 title: "更新成功",
                                 status: "success",
                                 duration: 2000,
-                                isClosable: false,
                                 position: "top"
                             });
                         });
