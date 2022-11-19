@@ -16,8 +16,9 @@ export class CodeforcesTentacle implements Tentacle
             return true;
         }
 
-        const testRe = /toNumbers\("(\w*)"\)/g;
+        logger("Start calculate cf token...");
 
+        const testRe = /toNumbers\("(\w*)"\)/g;
         const result = [...resp.matchAll(testRe)];
 
         const a = toNumbers(result[0][1]);
@@ -25,6 +26,8 @@ export class CodeforcesTentacle implements Tentacle
         const c = toNumbers(result[2][1]);
 
         this._token = toHex(slowAES.decrypt(c, 2, a, b));
+
+        logger("Calculated cf token.");
 
         return true;
     }
@@ -141,7 +144,7 @@ export class CodeforcesTentacle implements Tentacle
         });
 
         const contestTasks = new Array<Promise<void>>();
-        for(let j = 0; j < contestIds.length; j++)
+        for(let j = 0; j < Math.min(contestIds.length, 3); j++)
         {
             const contestTask = async () =>
             {
