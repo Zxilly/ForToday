@@ -42,12 +42,6 @@ export const targets: Target[] = [
         }
     },
     {
-        name: "GlenBzc",
-        accounts: {
-            codeforces: "GlenBzc"
-        }
-    },
-    {
         name: "Zxilly",
         accounts: {
             codeforces: "zxilly",

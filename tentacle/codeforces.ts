@@ -2,21 +2,45 @@ import { Problem, Tentacle, TentacleID, UserProblemStatus } from "../types/tenta
 import { load } from "cheerio";
 import { CODEFORCES_GROUP_ID } from "../constants";
 import { isValidDate, LogFunc, rankParse } from "../utils/utils";
+import { slowAES, toHex, toNumbers } from "../utils/cf";
 
 export class CodeforcesTentacle implements Tentacle
 {
+    private _token = "";
+
+    async requireAuth(logger: LogFunc): Promise<boolean>
+    {
+        const resp = await fetch("https://codeforces.com/").then(r => r.text());
+        if(!resp.includes("Redirecting"))
+        {
+            return true;
+        }
+
+        const testRe = /toNumbers\("(\w*)"\)/g;
+
+        const result = [...resp.matchAll(testRe)];
+
+        const a = toNumbers(result[0][1]);
+        const b = toNumbers(result[1][1]);
+        const c = toNumbers(result[2][1]);
+
+        this._token = toHex(slowAES.decrypt(c, 2, a, b));
+
+        return true;
+    }
+
     async fetch(account: string, _logger: LogFunc): Promise<UserProblemStatus>
     {
         const passProblemIds = new Set<string>();
         const problems = new Array<Problem>();
 
-        const rankResp = await fetch(`https://codeforces.com/profile/${account}`).then(res => res.text());
+        const rankResp = await this.fakeFetch(`https://codeforces.com/profile/${account}`).then(res => res.text());
         const rankDom = load(rankResp);
         const rank = rankDom(".info").find("li").eq(0).find("span").eq(0).text();
         const rankNum = parseInt(rank, 10);
         const rankResult = rankParse(rankNum);
 
-        const resp = await fetch(`https://codeforces.com/submissions/${account}`).then(res => res.text());
+        const resp = await this.fakeFetch(`https://codeforces.com/submissions/${account}`).then(res => res.text());
         const dom = load(resp);
 
         // const table = dom.querySelector("table.status-frame-datatable");
@@ -93,7 +117,7 @@ export class CodeforcesTentacle implements Tentacle
         }
 
         // logger("Fetching Codeforces group submissions...")
-        const res = await fetch(`https://codeforces.com/group/${CODEFORCES_GROUP_ID}/contests`).then(res => res.text());
+        const res = await this.fakeFetch(`https://codeforces.com/group/${CODEFORCES_GROUP_ID}/contests`).then(res => res.text());
         logger("Fetched Codeforces group submissions");
         const dom = load(res);
 
@@ -129,7 +153,7 @@ export class CodeforcesTentacle implements Tentacle
                 {
                     const singlePageTask = async () =>
                     {
-                        const response = await fetch(`${url}/page/${i}`).then((res) => res.text());
+                        const response = await this.fakeFetch(`${url}/page/${i}`).then((res) => res.text());
                         logger(`Fetched Codeforces contest ${contestNames[j]} submissions page ${i}.`);
                         const $ = load(response);
                         // logger(`Parsed Codeforces contest ${contestNames[j]} submissions page ${i}.`);
@@ -223,4 +247,16 @@ export class CodeforcesTentacle implements Tentacle
         }
         return result;
     }
+
+    async fakeFetch(url: string)
+    {
+        return await fetch(url, {
+            headers: {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+                "Cookie": `RCPC=${this._token};`
+            }
+        });
+    }
 }
+
+
