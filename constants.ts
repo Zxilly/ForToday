@@ -40,13 +40,6 @@ export const targets: Target[] = [
             nowcoder: "409383157",
             luogu: "109757"
         }
-    },
-    {
-        name: "Zxilly",
-        accounts: {
-            codeforces: "zxilly",
-            luogu: "38604"
-        }
     }
 ];
 
