@@ -3,7 +3,7 @@ import moment from "moment-timezone";
 export function isValidDate(d: Date)
 {
     const current = moment(d);
-    const before = moment().tz("Asia/Shanghai").endOf("day").subtract(3, "days");
+    const before = moment().tz("Asia/Shanghai").endOf("day").subtract(7, "days");
     return current.isAfter(before);
 }
 
