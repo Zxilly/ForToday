@@ -30,8 +30,6 @@ export class UserProblemStatus
         this.rank = rank;
     }
 
-
-    // eslint-disable-next-line @typescript-eslint/ban-types
     public static fromObject(obj: PureUserProblemStatus): UserProblemStatus
     {
         return new UserProblemStatus(obj.pass, obj.failed, obj.submitted, obj.rank);

@@ -21,7 +21,7 @@ export default async function handler(
     if(!lock)
     {
         logger("Lock exists, aborting...");
-        response.status(200).json({ message: "locked" });
+        response.status(200).json({ message: "can not acquire lock" });
         return;
     }
     await client.expire("lock", 15);
