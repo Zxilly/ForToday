@@ -144,7 +144,7 @@ export class CodeforcesTentacle implements Tentacle
         });
 
         const contestTasks = new Array<Promise<void>>();
-        for(let j = 0; j < Math.min(contestIds.length, 3); j++)
+        for(let j = 0; j < Math.min(contestIds.length, 8); j++)
         {
             const contestTask = async () =>
             {
