@@ -10,15 +10,21 @@ export const targets: Target[] = [
         }
     },
     {
-        name: "hirsute",
+        name: "Eronano",
         accounts: {
-            codeforces: "hirsute"
+            codeforces: "Eronano"
         }
     },
     {
-        name: "suidingyunmeinv",
+        name: "tiaokeng",
         accounts: {
-            codeforces: "suidingyunmeinv"
+            codeforces: "tiaokeng"
+        }
+    },
+    {
+        name: "orange.",
+        accounts: {
+            codeforces: "orange."
         }
     },
     {
