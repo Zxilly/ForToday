@@ -10,7 +10,7 @@ export default async function handler(
 {
     const logger = getNewTimedLogger();
 
-    if(request.method !== "GET")
+    if(request.method !== "POST")
     {
         response.status(405).json({ message: "Method Not Allowed" });
         return;

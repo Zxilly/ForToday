@@ -191,7 +191,9 @@ const UpdateButton: React.FC = () =>
                 if(!loading)
                 {
                     setLoading(true);
-                    fetch("/api/refresh")
+                    fetch("/api/refresh", {
+                        method: "POST"
+                    })
                         .then((r) =>
                         {
                             setLoading(false);
