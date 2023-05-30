@@ -2,6 +2,12 @@ import { Box, Link } from "@chakra-ui/react";
 import { groupBy, rankColor } from "../utils/utils";
 import { PureUserProblemStatus, SuccessProblem, UserProblemStatus } from "../types/tentacle";
 import React from "react";
+import A from "../pics/a.gif";
+import B from "../pics/b.gif";
+import C from "../pics/c.gif";
+import D from "../pics/d.gif";
+import E from "../pics/e.gif";
+import Image from "next/image";
 
 export type UserCardProps = {
     name: string;
@@ -48,15 +54,25 @@ export function UserCard(props: UserCardProps): JSX.Element
                 <Box as="span" color="gray.600" m={1} fontSize="1.5rem">
                     ({status.submitted})
                 </Box>
-                {groupBy(
+                {status.submitted !== 0 && groupBy(
                     UserProblemStatus.fromObject(status).getAll(),
                     (x: SuccessProblem) => x.contest
                 ).map((group) =>
                 {
                     return (
-                        <ProblemGroup key={Math.random().toString()} problems={group}/>
+                        <ProblemGroup key={Math.random().toString()} problems={group} />
                     );
                 })}
+                {status.submitted === 0 && (
+                    <Box fontSize="1.5rem" style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        padding: "1rem"
+                    }}>
+                        <Image priority={true} alt="emoji" src={[A, B, C, D, E][Math.floor(Math.random() * 5)]} />
+                    </Box>
+                )}
             </Box>
         </Box>
     );

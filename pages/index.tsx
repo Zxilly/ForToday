@@ -35,12 +35,7 @@ export default function Home({
 
     const sortedData = useMemo(() =>
     {
-        let flatted = Object.entries(data);
-        flatted = flatted.filter(([, status]) =>
-        {
-            return status.submitted !== 0;
-        });
-        return flatted;
+        return Object.entries(data);
     }, [data]);
 
     const cards = useMemo(() =>

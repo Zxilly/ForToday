@@ -3,6 +3,11 @@ import { load } from "cheerio";
 import { CODEFORCES_GROUP_ID } from "../constants";
 import { isValidDate, LogFunc, rankParse } from "../utils/utils";
 import { slowAES, toHex, toNumbers } from "../utils/cf";
+import retryFetch from "fetch-retry";
+
+const rf = retryFetch(fetch, {
+    retries: 3
+});
 
 export class CodeforcesTentacle implements Tentacle
 {
@@ -253,7 +258,7 @@ export class CodeforcesTentacle implements Tentacle
 
     async fakeFetch(url: string)
     {
-        return await fetch(url, {
+        return await rf(url, {
             headers: {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
                 "Cookie": `RCPC=${this._token};`
