@@ -1,34 +1,27 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# ForToday
 
-## Getting Started
+统计算法竞赛选手最近 7 天内的解题数量
 
-First, run the development server:
+![image](https://github.com/Zxilly/ForToday/assets/31370133/0a37cf94-f8da-47cc-be3b-664e03ff1164)
 
-```bash
-npm run dev
-# or
-yarn dev
-```
+## 支持
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+当前支持以下平台
+- [洛谷](https://www.luogu.com.cn/)
+- [Codeforces](https://codeforces.com/)
+- [NowCoder](https://ac.nowcoder.com/)
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+> Codeforces 支持获取组织内部 VP 的数据，需要设置 `constants.ts` 中的 `CODEFORCES_GROUP_ID`
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+## 使用方法
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+1. 修改 `constants.ts` 中的 `targets`
+2. 部署到 `vercel`，同时启动一个 `redis` 实例，并将 `REDIS_URL` 设置为 `redis` 实例的连接地址
 
-## Learn More
+## 配置
 
-To learn more about Next.js, take a look at the following resources:
+如果需要配置洛谷的爬取，可以启动后在网页中按 `Ctrl + Q` 后输入自己的洛谷 `Cookie`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## LICENSE
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+MIT
