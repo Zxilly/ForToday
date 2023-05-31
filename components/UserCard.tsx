@@ -1,9 +1,9 @@
 import { Box, Link } from "@chakra-ui/react";
 import { groupBy, rankColor } from "../utils/utils";
 import { PureUserProblemStatus, SuccessProblem, UserProblemStatus } from "../types/tentacle";
-import React, { useState } from "react";
-import Sad from "../pics/sad.gif";
-import Image from "next/image";
+import React from "react";
+import Lottie from "lottie-react";
+import animation from "./animation.json";
 
 export type UserCardProps = {
     name: string;
@@ -14,8 +14,6 @@ export function UserCard(props: UserCardProps): JSX.Element
 {
     const { name, status } = props;
     const color = status.rank !== undefined && status.rank >= 0 ? rankColor(status.rank) : "black";
-
-    const [emoji] = useState(Sad);
 
     return (
         <Box
@@ -67,9 +65,11 @@ export function UserCard(props: UserCardProps): JSX.Element
                         display: "flex",
                         justifyContent: "center",
                         alignItems: "center",
-                        padding: "1rem"
+                        padding: "1rem",
+                        height: "100%",
+                        width: "100%"
                     }}>
-                        <Image priority={true} alt="emoji" src={emoji} />
+                        <Lottie animationData={animation} />
                     </Box>
                 )}
             </Box>
