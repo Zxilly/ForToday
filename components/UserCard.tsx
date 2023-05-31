@@ -1,12 +1,8 @@
 import { Box, Link } from "@chakra-ui/react";
 import { groupBy, rankColor } from "../utils/utils";
 import { PureUserProblemStatus, SuccessProblem, UserProblemStatus } from "../types/tentacle";
-import React from "react";
-import A from "../pics/a.gif";
-import B from "../pics/b.gif";
-import C from "../pics/c.gif";
-import D from "../pics/d.gif";
-import E from "../pics/e.gif";
+import React, { useState } from "react";
+import Sad from "../pics/sad.gif";
 import Image from "next/image";
 
 export type UserCardProps = {
@@ -18,6 +14,9 @@ export function UserCard(props: UserCardProps): JSX.Element
 {
     const { name, status } = props;
     const color = status.rank !== undefined && status.rank >= 0 ? rankColor(status.rank) : "black";
+
+    const [emoji] = useState(Sad);
+
     return (
         <Box
             padding={4}
@@ -70,7 +69,7 @@ export function UserCard(props: UserCardProps): JSX.Element
                         alignItems: "center",
                         padding: "1rem"
                     }}>
-                        <Image priority={true} alt="emoji" src={[A, B, C, D, E][Math.floor(Math.random() * 5)]} />
+                        <Image priority={true} alt="emoji" src={emoji} />
                     </Box>
                 )}
             </Box>

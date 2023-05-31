@@ -80,6 +80,8 @@ export class UserProblemStatus
     }
 }
 
+type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>
+
 export interface Tentacle
 {
     fetch: (account: string, logger: LogFunc) => Promise<UserProblemStatus>;
@@ -93,5 +95,6 @@ export type TentacleID = "codeforces" | "nowcoder" | "luogu"
 export interface Target
 {
     name: string;
-    accounts: Partial<Record<TentacleID, string>>;
+    // codeforces account is necessary to render the rank color
+    accounts: AtLeast<Record<TentacleID, string>, "codeforces">;
 }
