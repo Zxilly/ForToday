@@ -19,10 +19,14 @@ export default function Home({
 {
     const [data, setData] = useState(result);
     const [start, setStart] = useState(0);
+
+    const [refreshLoading, setRefreshLoading] = useState(false);
+    const [nextPageLoading, setNextPageLoading] = useState(false);
+
     const { width } = useWindowSize();
     const toast = useToast();
 
-    const lastClick = useRef<number>(Date.now() - 2000);
+    const lastClick = useRef<number>(Date.now());
 
     const visibleCardCount = useMemo(() =>
     {
@@ -62,13 +66,20 @@ export default function Home({
 
     const refresh = useCallback(async () =>
     {
+        if(refreshLoading)
+        {
+            return;
+        }
+
+        setRefreshLoading(true);
         const res = await fetch("/api/data");
         if(res.status === 200)
         {
             const data = await res.json();
             setData(data);
         }
-    }, []);
+        setRefreshLoading(false);
+    }, [refreshLoading]);
 
     useInterval(async () =>
     {
@@ -86,11 +97,13 @@ export default function Home({
 
     const goNext = useCallback(() =>
     {
-        if(Date.now() - lastClick.current >= 2000)
+        setStart((start + visibleCardCount) % cards.length);
+        lastClick.current = Date.now();
+        setNextPageLoading(true);
+        setTimeout(() =>
         {
-            setStart((start + visibleCardCount) % cards.length);
-            lastClick.current = Date.now();
-        }
+            setNextPageLoading(false);
+        }, 2000);
     }, [start, visibleCardCount, cards.length]);
 
     return (
@@ -103,6 +116,7 @@ export default function Home({
                         <Stack direction={"column"} spacing={2}>
                             <Tooltip label="刷新" placement="right">
                                 <IconButton
+                                    isLoading={refreshLoading}
                                     aria-label={"refresh"}
                                     icon={<RepeatIcon />}
                                     variant={"solid"}
@@ -122,6 +136,7 @@ export default function Home({
                             </Tooltip>
                             <Tooltip label="下一页" placement="right">
                                 <IconButton
+                                    isLoading={nextPageLoading}
                                     aria-label={"next page"}
                                     icon={<TriangleDownIcon />}
                                     onClick={goNext}
@@ -131,9 +146,10 @@ export default function Home({
                     </Stack>
                 </Box>}
                 <Box m={6} p={6}>
-                    <AnimatePresence mode="wait">
+                    <AnimatePresence
+                        mode="wait">
                         <motion.div
-                            key={Math.random().toString()}
+                            key={`cards-${start}`}
                             initial={{ y: 10, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ y: -10, opacity: 0 }}
