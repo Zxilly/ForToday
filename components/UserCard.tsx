@@ -24,7 +24,10 @@ export function UserCard(props: UserCardProps): JSX.Element
             borderColor={color}
             overflow="hidden"
             style={{
-                background: `linear-gradient(250deg, ${color} 2rem, var(--chakra-colors-chakra-body-bg) 0)`
+                background: `linear-gradient(250deg, ${color} 2rem, var(--chakra-colors-chakra-body-bg) 0)`,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "flex-start",
             }}
         >
             <Box
@@ -38,19 +41,25 @@ export function UserCard(props: UserCardProps): JSX.Element
             >
                 {name}
             </Box>
-            <Box>
-                <Box as="span" fontSize="4rem">
-                    {status.pass.length}
-                </Box>
-                <Box as="span" fontSize="3rem" m={2}>
-                    /
-                </Box>
-                <Box as="span" color="gray.600" fontSize="2rem">
-                    {status.pass.length + status.failed.length}
-                </Box>
-                <Box as="span" color="gray.600" m={1} fontSize="1.5rem">
-                    ({status.submitted})
-                </Box>
+            <Box
+                flexGrow="1"
+                display="flex"
+                flexDirection="column"
+            >
+                <div>
+                    <Box as="span" fontSize="4rem">
+                        {status.pass.length}
+                    </Box>
+                    <Box as="span" fontSize="3rem" m={2}>
+                        /
+                    </Box>
+                    <Box as="span" color="gray.600" fontSize="2rem">
+                        {status.pass.length + status.failed.length}
+                    </Box>
+                    <Box as="span" color="gray.600" m={1} fontSize="1.5rem">
+                        ({status.submitted})
+                    </Box>
+                </div>
                 {status.submitted !== 0 && groupBy(
                     UserProblemStatus.fromObject(status).getAll(),
                     (x: SuccessProblem) => x.contest
@@ -66,8 +75,7 @@ export function UserCard(props: UserCardProps): JSX.Element
                         justifyContent: "center",
                         alignItems: "center",
                         padding: "1rem",
-                        height: "100%",
-                        width: "100%"
+                        flexGrow: 1,
                     }}>
                         <Lottie animationData={animation} />
                     </Box>
