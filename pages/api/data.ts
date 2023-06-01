@@ -14,7 +14,7 @@ export default async function handler(
         return;
     }
 
-    const data = await readData(logger);
+    const data = await readData(client, logger);
     if(data)
     {
         logger("Data exists, returning...");

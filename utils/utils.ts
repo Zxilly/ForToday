@@ -1,5 +1,5 @@
 import moment from "moment-timezone";
-import { client } from "../constants";
+import Redis from "ioredis";
 
 export function isValidDate(d: Date)
 {
@@ -42,7 +42,7 @@ export function getNewTimedLogger(): LogFunc
     };
 }
 
-export async function readData(log?: LogFunc): Promise<string | null>
+export async function readData(client: Redis, log?: LogFunc): Promise<string | null>
 {
     log?.("Reading data...");
     const data = await client.get("data");

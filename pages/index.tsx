@@ -10,6 +10,7 @@ import { useInterval, useWindowSize } from "react-use";
 import { RepeatIcon, SpinnerIcon, TriangleDownIcon } from "@chakra-ui/icons";
 import TokenDialog from "../components/TokenDialog";
 import { getNewTimedLogger, readData } from "../utils/utils";
+import { client } from "../constants";
 
 export default function Home({
     result
@@ -171,7 +172,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) =>
     res.setHeader("Cache-Control", "public, s-maxage=15, stale-while-revalidate=60");
 
     const logger = getNewTimedLogger();
-    const data = await readData(logger);
+    const data = await readData(client, logger);
     console.info(logger("getResult"));
     if(!data)
     {
