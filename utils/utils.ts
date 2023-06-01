@@ -1,4 +1,5 @@
 import moment from "moment-timezone";
+import { client } from "../constants";
 
 export function isValidDate(d: Date)
 {
@@ -10,7 +11,7 @@ export function isValidDate(d: Date)
 export function groupBy<T>(array: Array<T>, f: (arg: T) => unknown)
 {
     const groups: Record<string, Array<T>> = {};
-    array.forEach(function (o)
+    array.forEach(function(o)
     {
         const group = JSON.stringify(f(o));
         groups[group] = groups[group] || [];
@@ -27,7 +28,7 @@ export function getNewTimedLogger(): LogFunc
 {
     const last = Date.now();
     const messages = new Array<string>();
-    return function (msg: string)
+    return function(msg: string)
     {
         if(msg === "getResult")
         {
@@ -39,6 +40,14 @@ export function getNewTimedLogger(): LogFunc
         console.log(msgt);
         messages.push(msgt);
     };
+}
+
+export async function readData(log?: LogFunc): Promise<string | null>
+{
+    log?.("Reading data...");
+    const data = await client.get("data");
+    log?.("Read data.");
+    return data;
 }
 
 export function rankParse(rank: number)

@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { client } from "../../constants";
-import { getNewTimedLogger } from "../../utils/utils";
+import { getNewTimedLogger, readData } from "../../utils/utils";
 
 export default async function handler(
     request: NextApiRequest,
@@ -14,7 +14,7 @@ export default async function handler(
         return;
     }
 
-    const data = await client.get("data");
+    const data = await readData(logger);
     if(data)
     {
         logger("Data exists, returning...");

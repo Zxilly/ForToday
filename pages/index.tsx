@@ -1,7 +1,6 @@
 // noinspection JSIgnoredPromiseFromCall
 
 import { Box, Container, IconButton, SimpleGrid, Stack, Tooltip, useToast } from "@chakra-ui/react";
-import { client } from "../constants";
 import { PureUserProblemStatus, UserProblemStatus } from "../types/tentacle";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { UserCard } from "../components/UserCard";
@@ -10,6 +9,7 @@ import { GetServerSideProps } from "next";
 import { useInterval, useWindowSize } from "react-use";
 import { RepeatIcon, SpinnerIcon, TriangleDownIcon } from "@chakra-ui/icons";
 import TokenDialog from "../components/TokenDialog";
+import { getNewTimedLogger, readData } from "../utils/utils";
 
 export default function Home({
     result
@@ -170,7 +170,9 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) =>
 {
     res.setHeader("Cache-Control", "public, s-maxage=15, stale-while-revalidate=60");
 
-    const data = await client.get("data");
+    const logger = getNewTimedLogger();
+    const data = await readData(logger);
+    console.info(logger("getResult"));
     if(!data)
     {
         return {
