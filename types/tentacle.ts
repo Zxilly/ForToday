@@ -20,7 +20,7 @@ export class UserProblemStatus
     pass: Problem[];
     failed: Problem[];
     submitted: number;
-    rank?: number = -1;
+    rank = -1;
 
     constructor(pass: Problem[], failed: Problem[], submitted: number, rank = -1)
     {

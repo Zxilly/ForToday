@@ -3,7 +3,8 @@ import { groupBy, rankColor } from "../utils/utils";
 import { PureUserProblemStatus, SuccessProblem, UserProblemStatus } from "../types/tentacle";
 import React from "react";
 import Lottie from "lottie-react";
-import animation from "./animation.json";
+import animationA from "../animation/A.json";
+import animationB from "../animation/B.json";
 
 export type UserCardProps = {
     name: string;
@@ -14,6 +15,8 @@ export function UserCard(props: UserCardProps): JSX.Element
 {
     const { name, status } = props;
     const color = status.rank !== undefined && status.rank >= 0 ? rankColor(status.rank) : "black";
+
+    const pickAnimation = (status.rank + 1) % 2 === 0 ? animationA : animationB;
 
     return (
         <Box
@@ -77,7 +80,7 @@ export function UserCard(props: UserCardProps): JSX.Element
                         padding: "1rem",
                         flexGrow: 1,
                     }}>
-                        <Lottie animationData={animation} />
+                        <Lottie animationData={pickAnimation} />
                     </Box>
                 )}
             </Box>
