@@ -65,7 +65,7 @@ export function UserCard(props: UserCardProps): JSX.Element
                 </div>
                 {status.submitted !== 0 && groupBy(
                     UserProblemStatus.fromObject(status).getAll(),
-                    (x: SuccessProblem) => x.contest
+                    (x: SuccessProblem) => `${x.platform}-${x.contest}`
                 ).map((group, i) =>
                 {
                     return (
