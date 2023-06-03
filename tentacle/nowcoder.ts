@@ -2,7 +2,7 @@ import { Problem, Tentacle, UserProblemStatus } from "../types/tentacle";
 import { isValidDate, LogFunc } from "../utils/utils";
 import { load } from "cheerio";
 
-export class NowcoderTentacle implements Tentacle
+export class NowCoderTentacle implements Tentacle
 {
     async fetch(account: string, _logger: LogFunc): Promise<UserProblemStatus>
     {
@@ -15,10 +15,12 @@ export class NowcoderTentacle implements Tentacle
         const rows = tbody?.find("tr");
         if(rows === undefined || rows.length === 1)
             return UserProblemStatus.empty();
-        const passProblems: Problem[] = [];
+
         const passProblemsID = new Set<string>();
-        const failedProblems: Problem[] = [];
         const failedProblemsID = new Set<string>();
+
+        const problemMap = new Map<string, Problem>();
+
         let cnt = 0;
         rows.each((i, row) =>
         {
@@ -33,25 +35,33 @@ export class NowcoderTentacle implements Tentacle
                 platform: "nowcoder",
                 contest: "",
                 title: info.text() ?? "",
-                url: `https://ac.nowcoder.com${url}`,
+                url: `https://ac.nowcoder.com${url}`
             };
+
+            problemMap.set(problem.id, problem);
             if(items.eq(3).text().trim() === "100")
             {
                 if(!passProblemsID.has(problem.id))
                 {
-                    passProblems.push(problem);
                     passProblemsID.add(problem.id);
+                    if(failedProblemsID.has(problem.id))
+                    {
+                        failedProblemsID.delete(problem.id);
+                    }
                 }
             }
             else
             {
-                if(!failedProblemsID.has(problem.id))
+                if(!failedProblemsID.has(problem.id) && !passProblemsID.has(problem.id))
                 {
-                    failedProblems.push(problem);
                     failedProblemsID.add(problem.id);
                 }
             }
         });
+
+        const passProblems: Problem[] = Array.from(passProblemsID).map(id => problemMap.get(id)!);
+        const failedProblems: Problem[] = Array.from(failedProblemsID).map(id => problemMap.get(id)!);
+
         return new UserProblemStatus(passProblems, failedProblems, cnt);
     }
 }

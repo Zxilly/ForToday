@@ -3,12 +3,12 @@ import { UserProblemStatus } from "../types/tentacle";
 import { CodeforcesTentacle } from "./codeforces";
 import { targets } from "../constants";
 import { LogFunc } from "../utils/utils";
-import { NowcoderTentacle } from "./nowcoder";
+import { NowCoderTentacle } from "./nowcoder";
 import { LuoguTentacle } from "./luogu";
 
 const tentaclesImpl: Record<TentacleID, Tentacle> = {
     codeforces: new CodeforcesTentacle(),
-    nowcoder: new NowcoderTentacle(),
+    nowcoder: new NowCoderTentacle(),
     luogu: new LuoguTentacle(),
 };
 
