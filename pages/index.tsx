@@ -47,7 +47,7 @@ export default function Home({
     {
         return sortedData.map(([name, status]) =>
         {
-            return <UserCard key={Math.random().toString()} name={name} status={status} />;
+            return <UserCard key={name} name={name} status={status} />;
         });
     }, [sortedData]);
 

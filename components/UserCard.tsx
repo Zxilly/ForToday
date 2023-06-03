@@ -30,7 +30,7 @@ export function UserCard(props: UserCardProps): JSX.Element
                 background: `linear-gradient(250deg, ${color} 2rem, var(--chakra-colors-chakra-body-bg) 0)`,
                 display: "flex",
                 flexDirection: "column",
-                justifyContent: "flex-start",
+                justifyContent: "flex-start"
             }}
         >
             <Box
@@ -66,10 +66,10 @@ export function UserCard(props: UserCardProps): JSX.Element
                 {status.submitted !== 0 && groupBy(
                     UserProblemStatus.fromObject(status).getAll(),
                     (x: SuccessProblem) => x.contest
-                ).map((group) =>
+                ).map((group, i) =>
                 {
                     return (
-                        <ProblemGroup key={Math.random().toString()} problems={group} />
+                        <ProblemGroup key={`${name}-${i}`} problems={group} />
                     );
                 })}
                 {status.submitted === 0 && (
@@ -78,7 +78,7 @@ export function UserCard(props: UserCardProps): JSX.Element
                         justifyContent: "center",
                         alignItems: "center",
                         padding: "1rem",
-                        flexGrow: 1,
+                        flexGrow: 1
                     }}>
                         <Lottie animationData={pickAnimation} />
                     </Box>
@@ -112,7 +112,7 @@ function ProblemGroup({
             {problems.map((problem) =>
             {
                 return (
-                    <div key={Math.random().toString()}>
+                    <div key={`${problem.id}`}>
                         <Link href={problem.url} isExternal>
                             <Box
                                 as="span"
