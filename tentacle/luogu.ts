@@ -42,10 +42,29 @@ export class LuoguTentacle implements Tentacle
             "https://www.luogu.com.cn/record/list?user=109757&page=1&_contentOnly=1",
             {
                 headers: {
-                    "Cookie": `_uid=${token.uid}; __client_id=${token.client_id};`,
+                    "Cookie": `_uid=${token.uid}; __client_id=${token.client_id};`
                 }
             }
-        ).then(r => r.json());
+        ).then(r =>
+        {
+            if(r.status !== 200)
+            {
+                return null;
+            }
+            try
+            {
+                return r.json();
+            } catch(e)
+            {
+                console.error(e);
+                return null;
+            }
+        });
+        if(!resp)
+        {
+            return false;
+        }
+
         return resp.currentTemplate === "RecordList";
     }
 
@@ -54,6 +73,12 @@ export class LuoguTentacle implements Tentacle
         if(!this.token)
         {
             throw new Error("Luogu token not found");
+        }
+
+        if(!await this.check(this.token))
+        {
+            console.warn("Luogu token invalid");
+            return UserProblemStatus.empty();
         }
 
         const { uid, client_id } = this.token;
@@ -67,7 +92,7 @@ export class LuoguTentacle implements Tentacle
             const resp = await fetch(`https://www.luogu.com.cn/record/list?user=${account}&page=${i}&_contentOnly=1`,
                 {
                     headers: {
-                        "Cookie": `_uid=${uid}; __client_id=${client_id};`,
+                        "Cookie": `_uid=${uid}; __client_id=${client_id};`
                     }
                 }
             ).then(r => r.json());
