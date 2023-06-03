@@ -2,8 +2,10 @@ import { Problem, Tentacle, UserProblemStatus } from "../types/tentacle";
 import { isValidDate, LogFunc } from "../utils/utils";
 import { client } from "../constants";
 import { LuoguSavedToken, LuoguToken } from "../types/luogu";
-import axios from "axios";
+import axios, { AxiosInstance, AxiosResponse } from "axios";
 import * as dns from "dns";
+import * as http from "http";
+import * as https from "https";
 
 export class LuoguTentacle implements Tentacle
 {
@@ -40,7 +42,7 @@ export class LuoguTentacle implements Tentacle
 
     async check(token: LuoguToken): Promise<boolean>
     {
-        const resp = await luoguFetch("https://www.luogu.com.cn/record/list?user=109757&page=1&_contentOnly=1", token.uid, token.client_id);
+        const resp = (await luoguFetch("https://www.luogu.com.cn/record/list?user=109757&page=1&_contentOnly=1", token.uid, token.client_id)).data;
 
         return resp.currentTemplate === "RecordList";
     }
@@ -66,7 +68,7 @@ export class LuoguTentacle implements Tentacle
 
         for(let i = 1; i <= 2; i++)
         {
-            const resp = await luoguFetch(`https://www.luogu.com.cn/record/list?user=${account}&page=${i}&_contentOnly=1`, uid, client_id);
+            const resp = (await luoguFetch(`https://www.luogu.com.cn/record/list?user=${account}&page=${i}&_contentOnly=1`, uid, client_id)).data;
             logger(`Fetched luogu ${account} page ${i}.`);
             if(resp.currentTemplate !== "RecordList")
             {
@@ -122,17 +124,30 @@ export class LuoguTentacle implements Tentacle
     }
 }
 
-async function luoguFetch(url: string, uid: string, client_id: string): Promise<any>
+const customDNSLookup = (hostname: string, options: dns.LookupOptions, callback: (err: NodeJS.ErrnoException | null, address: string, family: number) => void): void =>
 {
-    return await axios.get(url, {
+    return dns.lookup("www.luogu.com.cn.wswebpic.com", options, (err, address, family) =>
+    {
+        callback(err, address as string, family);
+    });
+};
+
+// 使用自定义DNS解析器配置httpAgent和httpsAgent
+const httpAgent = new http.Agent({ lookup: customDNSLookup });
+const httpsAgent = new https.Agent({ lookup: customDNSLookup });
+
+// 创建一个使用自定义DNS解析器的axios实例
+const customAxios: AxiosInstance = axios.create({
+    httpAgent,
+    httpsAgent
+});
+
+async function luoguFetch(url: string, uid: string, client_id: string): Promise<AxiosResponse<any, any>>
+{
+    return await customAxios.get(url, {
         headers: {
             "Cookie": `_uid=${uid}; __client_id=${client_id};`,
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.57"
-        },
-        lookup: async (): Promise<string> =>
-        {
-            const ip = await dns.promises.lookup("www.luogu.com.cn.wswebpic.com");
-            return ip.address;
         }
     });
 }
