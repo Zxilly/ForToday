@@ -2,6 +2,8 @@ import { Problem, Tentacle, UserProblemStatus } from "../types/tentacle";
 import { isValidDate, LogFunc } from "../utils/utils";
 import { client } from "../constants";
 import { LuoguSavedToken, LuoguToken } from "../types/luogu";
+import axios from "axios";
+import * as dns from "dns";
 
 export class LuoguTentacle implements Tentacle
 {
@@ -38,32 +40,7 @@ export class LuoguTentacle implements Tentacle
 
     async check(token: LuoguToken): Promise<boolean>
     {
-        const resp = await fetch(
-            "https://www.luogu.com.cn/record/list?user=109757&page=1&_contentOnly=1",
-            {
-                headers: {
-                    "Cookie": `_uid=${token.uid}; __client_id=${token.client_id};`
-                }
-            }
-        ).then(r =>
-        {
-            if(r.status !== 200)
-            {
-                return null;
-            }
-            try
-            {
-                return r.json();
-            } catch(e)
-            {
-                console.error(e);
-                return null;
-            }
-        });
-        if(!resp)
-        {
-            return false;
-        }
+        const resp = await luoguFetch("https://www.luogu.com.cn/record/list?user=109757&page=1&_contentOnly=1", token.uid, token.client_id);
 
         return resp.currentTemplate === "RecordList";
     }
@@ -89,13 +66,7 @@ export class LuoguTentacle implements Tentacle
 
         for(let i = 1; i <= 2; i++)
         {
-            const resp = await fetch(`https://www.luogu.com.cn/record/list?user=${account}&page=${i}&_contentOnly=1`,
-                {
-                    headers: {
-                        "Cookie": `_uid=${uid}; __client_id=${client_id};`
-                    }
-                }
-            ).then(r => r.json());
+            const resp = await luoguFetch(`https://www.luogu.com.cn/record/list?user=${account}&page=${i}&_contentOnly=1`, uid, client_id);
             logger(`Fetched luogu ${account} page ${i}.`);
             if(resp.currentTemplate !== "RecordList")
             {
@@ -149,4 +120,19 @@ export class LuoguTentacle implements Tentacle
 
         return new UserProblemStatus(pass, failed, problems.length);
     }
+}
+
+async function luoguFetch(url: string, uid: string, client_id: string): Promise<any>
+{
+    return await axios.get(url, {
+        headers: {
+            "Cookie": `_uid=${uid}; __client_id=${client_id};`,
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.57"
+        },
+        lookup: async (): Promise<string> =>
+        {
+            const ip = await dns.promises.lookup("www.luogu.com.cn.wswebpic.com");
+            return ip.address;
+        }
+    });
 }
