@@ -8,7 +8,7 @@ export type Problem = {
     url: string
 }
 
-export type SuccessProblem = Problem & { success: boolean }
+export type ProblemWithStatus = Problem & { success: boolean }
 
 type safeFunction = (...args: any[]) => any
 export type PureUserProblemStatus = {
@@ -35,9 +35,9 @@ export class UserProblemStatus
         return new UserProblemStatus(obj.pass, obj.failed, obj.submitted, obj.rank);
     }
 
-    public getAll(): SuccessProblem[]
+    public getAll(): ProblemWithStatus[]
     {
-        const all: SuccessProblem[] = [];
+        const all: ProblemWithStatus[] = [];
         for(const problem of this.pass)
         {
             all.push({ ...problem, success: true });

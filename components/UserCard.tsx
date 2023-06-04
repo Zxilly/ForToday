@@ -1,10 +1,11 @@
 import { Box, Link } from "@chakra-ui/react";
 import { groupBy, rankColor } from "../utils/utils";
-import { PureUserProblemStatus, SuccessProblem, UserProblemStatus } from "../types/tentacle";
-import React from "react";
+import { ProblemWithStatus, PureUserProblemStatus, UserProblemStatus } from "../types/tentacle";
+import React, { useEffect } from "react";
 import Lottie from "lottie-react";
 import animationA from "../animation/A.json";
 import animationB from "../animation/B.json";
+import animationC from "../animation/C.json";
 
 export type UserCardProps = {
     name: string;
@@ -16,7 +17,23 @@ export function UserCard(props: UserCardProps): JSX.Element
     const { name, status } = props;
     const color = status.rank !== undefined && status.rank >= 0 ? rankColor(status.rank) : "black";
 
-    const pickAnimation = (status.rank + 1) % 2 === 0 ? animationA : animationB;
+
+    const [animation, setAnimation] = React.useState<any>(animationA);
+    useEffect(() =>
+    {
+        switch ((status.rank + 1) % 3)
+        {
+            case 0:
+                setAnimation(animationA);
+                break;
+            case 1:
+                setAnimation(animationB);
+                break;
+            case 2:
+                setAnimation(animationC);
+                break;
+        }
+    }, [status.rank]);
 
     return (
         <Box
@@ -65,8 +82,13 @@ export function UserCard(props: UserCardProps): JSX.Element
                 </div>
                 {status.submitted !== 0 && groupBy(
                     UserProblemStatus.fromObject(status).getAll(),
-                    (x: SuccessProblem) => `${x.platform}-${x.contest}`
-                ).sort().map((group, i) =>
+                    (x: ProblemWithStatus) => `${x.platform}-${x.contest}`
+                ).sort((a, b) =>
+                {
+                    const ap = a[0];
+                    const bp = b[0];
+                    return `${ap.platform}-${ap.contest}`.localeCompare(`${bp.platform}-${bp.contest}`);
+                }).map((group, i) =>
                 {
                     return (
                         <ProblemGroup key={`${name}-${i}`} problems={group} />
@@ -80,7 +102,7 @@ export function UserCard(props: UserCardProps): JSX.Element
                         padding: "1rem",
                         flexGrow: 1
                     }}>
-                        <Lottie animationData={pickAnimation} />
+                        <Lottie animationData={animation} />
                     </Box>
                 )}
             </Box>
@@ -91,7 +113,7 @@ export function UserCard(props: UserCardProps): JSX.Element
 function ProblemGroup({
     problems
 }: {
-    problems: SuccessProblem[];
+    problems: ProblemWithStatus[];
 }): JSX.Element
 {
     if(problems.length === 0)
