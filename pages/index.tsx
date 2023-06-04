@@ -11,8 +11,9 @@ import { RepeatIcon, SpinnerIcon, TriangleDownIcon } from "@chakra-ui/icons";
 import TokenDialog from "../components/TokenDialog";
 import { getNewTimedLogger, readData } from "../utils/utils";
 import { client } from "../constants";
+import NoSSR from "../components/NoSSR";
 
-export default function Home({
+function Home({
     result
 }: {
     result: Record<string, PureUserProblemStatus>;
@@ -121,7 +122,7 @@ export default function Home({
     }, [start, visibleCardCount, cards.length]);
 
     return (
-        <>
+        <NoSSR>
             <TokenDialog />
             <Container maxW="container.xl">
                 {visibleCardCount !== 1 && <Box className={"activeCardIndicator"}>
@@ -176,7 +177,7 @@ export default function Home({
                     </AnimatePresence>
                 </Box>
             </Container>
-        </>
+        </NoSSR>
     );
 }
 
@@ -241,3 +242,5 @@ const UpdateButton: React.FC = () =>
         />
     </Tooltip>;
 };
+
+export default Home;
