@@ -9,7 +9,7 @@ export default function App({ Component, pageProps }: AppProps)
         <>
             <Head>
                 <meta name="referrer" content="never"/>
-                <title>Three days</title>
+                <title>Seven days</title>
             </Head>
             <ChakraProvider>
                 <Component {...pageProps} />
