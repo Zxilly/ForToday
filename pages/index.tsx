@@ -29,10 +29,13 @@ export default function Home({
 
     const lastClick = useRef<number>(Date.now());
 
-    const visibleCardCount = useMemo(() =>
+    const [visibleCardCount, setVisibleCardCount] = useState(1);
+
+    useEffect(() =>
     {
-        return Math.floor(Math.min(width, 1280) / 300);
+        setVisibleCardCount(Math.floor(Math.min(width, 1280) / 300));
     }, [width]);
+
     const updateInterval = useMemo(() =>
     {
         return 1000 * 5 * visibleCardCount;
