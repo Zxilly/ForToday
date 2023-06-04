@@ -24,7 +24,6 @@ export default function Home({
     const [refreshLoading, setRefreshLoading] = useState(false);
     const [nextPageLoading, setNextPageLoading] = useState(false);
 
-    const { width } = useWindowSize();
     const toast = useToast();
 
     const lastClick = useRef<number>(Date.now());
@@ -33,8 +32,14 @@ export default function Home({
 
     useEffect(() =>
     {
-        setVisibleCardCount(Math.floor(Math.min(width, 1280) / 300));
-    }, [width]);
+        setVisibleCardCount(Math.floor(Math.min(window.innerWidth, 1280) / 300));
+
+        const onResize = () =>
+        {
+            setVisibleCardCount(Math.floor(Math.min(window.innerWidth, 1280) / 300));
+        };
+        window.addEventListener("resize", onResize);
+    }, []);
 
     const updateInterval = useMemo(() =>
     {
