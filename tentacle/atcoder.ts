@@ -1,34 +1,43 @@
-import { Problem, Tentacle, UserProblemStatus } from "../types/tentacle";
+import { ProblemHelper } from ".";
+import { Tentacle, UserProblemStatus } from "../types/tentacle";
 import { CRAWL_DAY, LogFunc } from "../utils/utils";
 
 export class AtcoderTentacle implements Tentacle
 {
     async fetch(account: string, _logger: LogFunc): Promise<UserProblemStatus>
     {
-        const all_problems = await fetch("https://kenkoooo.com/atcoder/resources/contest-problem.json").then(resp => resp.json());
-        const pid2cid : Record<string,string> = {};
-        for(const problem of all_problems) pid2cid[problem["problem_id"]] = problem["contest_id"];
-        const from_second = new Date();
-        from_second.setDate(from_second.getDate()-CRAWL_DAY);
+        const contests_info = await fetch("https://kenkoooo.com/atcoder/resources/contests.json").then(resp => resp.json());
+        const cid2title : Record<string, string> = {};
+        for(const info of contests_info) cid2title[info["id"]] = info["title"];
+
+        const problems_info = await fetch("https://kenkoooo.com/atcoder/resources/problems.json").then(resp => resp.json());
+        const pid2pro : Record<string, { contest_id:string, title:string }> = {};
+        for(const info of problems_info)
+        {
+            pid2pro[info["id"]] = {
+                contest_id: info["contest_id"],
+                title: info["title"]
+            };
+        }
+
+        const from_second = Math.floor(Date.now()/1000)-CRAWL_DAY*24*60*60;
         const data = await fetch(
-            `https://kenkoooo.com/atcoder/atcoder-api/v3/user/submissions?user=${account}&from_second=${Math.floor(from_second.getTime()/1000)}`
+            `https://kenkoooo.com/atcoder/atcoder-api/v3/user/submissions?user=${account}&from_second=${from_second}`
         ).then(resp => resp.json());
-        const id2result : Record<string, boolean> = {};
-        const id2problem : Record<string, Problem> = {};
+
+        const helper = new ProblemHelper();
         for(const item of data)
         {
             const id = item["problem_id"];
-            id2result[id] ||= item["result"]==="AC";
-            id2problem[id] ||= {
+            const p = pid2pro[id];
+            helper.add_problem(id, item["result"]==="AC", {
                 id,
                 platform: "atcoder",
-                contest: item["contest_id"],
-                title: id,
-                url: `https://atcoder.jp/contests/${pid2cid[id]}/tasks/${id}`,
-            };
+                contest: cid2title[p.contest_id],
+                title: p.title,
+                url: `https://atcoder.jp/contests/${p.contest_id}/tasks/${id}`,
+            });
         }
-        const passProblems : Problem[] = [], failedProblems : Problem[] = [];
-        for(const item of Object.entries(id2result)) (item[1] ? passProblems : failedProblems).push(id2problem[item[0]]);
-        return new UserProblemStatus(passProblems, failedProblems, 0);
+        return helper.get_status();
     }
 }

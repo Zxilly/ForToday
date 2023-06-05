@@ -1,11 +1,12 @@
-import { Problem, Tentacle, UserProblemStatus } from "../types/tentacle";
-import { isValidDate, LogFunc } from "../utils/utils";
-import { client } from "../constants";
-import { LuoguSavedToken, LuoguToken } from "../types/luogu";
 import axios, { AxiosInstance, AxiosResponse } from "axios";
 import * as dns from "dns";
 import * as http from "http";
 import * as https from "https";
+import { ProblemHelper } from ".";
+import { client } from "../constants";
+import { LuoguSavedToken, LuoguToken } from "../types/luogu";
+import { Tentacle, UserProblemStatus } from "../types/tentacle";
+import { LogFunc, isValidDate } from "../utils/utils";
 
 export class LuoguTentacle implements Tentacle
 {
@@ -62,10 +63,7 @@ export class LuoguTentacle implements Tentacle
 
         const { uid, client_id } = this.token;
 
-        const successProblemIDs: Set<string> = new Set();
-        const failedProblemIDs: Set<string> = new Set();
-        const problems = new Array<Problem>();
-
+        const helper = new ProblemHelper();
         for(let i = 1; i <= 2; i++)
         {
             const resp = (await luoguFetch(`https://www.luogu.com.cn/record/list?user=${account}&page=${i}&_contentOnly=1`, uid, client_id)).data;
@@ -84,26 +82,13 @@ export class LuoguTentacle implements Tentacle
                 }
 
                 const id = `luogu-${record.problem.pid}`;
-                if(record.status === 12)
-                {
-                    successProblemIDs.add(id);
-                }
-
-                problems.push({
-                    url: `https://www.luogu.com.cn/problem/${record.problem.pid}`,
-                    id: id,
-                    title: record.problem.title,
+                helper.add_problem(id, record.status === 12, {
+                    id,
+                    platform: "luogu",
                     contest: record.contest?.name ?? "",
-                    platform: "luogu"
+                    title: `${record.problem.pid} ${record.problem.title}`,
+                    url: `https://www.luogu.com.cn/problem/${record.problem.pid}`,
                 });
-            }
-
-            for(const problem of problems)
-            {
-                if(!successProblemIDs.has(problem.id))
-                {
-                    failedProblemIDs.add(problem.id);
-                }
             }
 
             if(resp.currentData.records.count < 20)
@@ -116,11 +101,7 @@ export class LuoguTentacle implements Tentacle
                 break;
             }
         }
-
-        const pass = Array.from(successProblemIDs).map(id => problems.find(p => p.id === id)!);
-        const failed = Array.from(failedProblemIDs).map(id => problems.find(p => p.id === id)!);
-
-        return new UserProblemStatus(pass, failed, problems.length);
+        return helper.get_status();
     }
 }
 
