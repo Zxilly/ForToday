@@ -90,15 +90,6 @@ function Home({
         await refresh();
     }, updateInterval * 4);
 
-    useEffect(() =>
-    {
-        const timerID = setTimeout(() =>
-        {
-            setStart((start + visibleCardCount) % cards.length);
-        }, updateInterval);
-        return () => clearTimeout(timerID);
-    }, [start, visibleCardCount, cards.length, updateInterval]);
-
     const goNext = useCallback(() =>
     {
         setStart((start + visibleCardCount) % cards.length);
@@ -109,6 +100,15 @@ function Home({
             setNextPageLoading(false);
         }, 2000);
     }, [start, visibleCardCount, cards.length]);
+
+    useEffect(() =>
+    {
+        const timerID = setTimeout(() =>
+        {
+            goNext();
+        }, updateInterval);
+        return () => clearTimeout(timerID);
+    }, [start, visibleCardCount, cards.length, updateInterval, goNext]);
 
     return (
         <NoSSR>
