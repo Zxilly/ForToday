@@ -90,7 +90,7 @@ export interface Tentacle
     requireAuth?: (logger: LogFunc) => Promise<boolean>;
 }
 
-export type TentacleID = "codeforces" | "nowcoder" | "luogu"
+export type TentacleID = "codeforces" | "nowcoder" | "luogu" | "atcoder"
 
 export interface Target
 {
