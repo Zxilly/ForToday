@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import * as dns from "dns";
 import * as http from "http";
 import * as https from "https";
@@ -6,7 +6,8 @@ import { ProblemHelper } from ".";
 import { client } from "../constants";
 import { LuoguSavedToken, LuoguToken } from "../types/luogu";
 import { Tentacle, UserProblemStatus } from "../types/tentacle";
-import { LogFunc, isValidDate } from "../utils/utils";
+import { isValidDate, LogFunc } from "../utils/utils";
+import axiosRetry from "axios-retry";
 
 export class LuoguTentacle implements Tentacle
 {
@@ -87,7 +88,7 @@ export class LuoguTentacle implements Tentacle
                     platform: "luogu",
                     contest: record.contest?.name ?? "",
                     title: `${record.problem.pid} ${record.problem.title}`,
-                    url: `https://www.luogu.com.cn/problem/${record.problem.pid}`,
+                    url: `https://www.luogu.com.cn/problem/${record.problem.pid}`
                 });
             }
 
@@ -123,12 +124,23 @@ const customAxios: AxiosInstance = axios.create({
     httpsAgent
 });
 
+axiosRetry(customAxios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
+
 async function luoguFetch(url: string, uid: string, client_id: string): Promise<AxiosResponse<any, any>>
 {
-    return await customAxios.get(url, {
-        headers: {
-            "Cookie": `_uid=${uid}; __client_id=${client_id};`,
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.57"
-        }
-    });
+    try
+    {
+        return await customAxios.get(url, {
+            headers: {
+                "Cookie": `_uid=${uid}; __client_id=${client_id};`,
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.57"
+            }
+        });
+    } catch(error)
+    {
+        const e = error as AxiosError;
+        console.error(e.response);
+    }
+
+    throw new Error("Luogu fetch failed");
 }
