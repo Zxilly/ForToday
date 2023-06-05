@@ -1,10 +1,12 @@
 import moment from "moment-timezone";
 import Redis from "ioredis";
 
+export const CRAWL_DAY = 7;
+
 export function isValidDate(d: Date)
 {
     const current = moment(d);
-    const before = moment().tz("Asia/Shanghai").endOf("day").subtract(7, "days");
+    const before = moment().tz("Asia/Shanghai").endOf("day").subtract(CRAWL_DAY, "days");
     return current.isAfter(before);
 }
 

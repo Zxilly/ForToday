@@ -5,11 +5,13 @@ import { targets } from "../constants";
 import { LogFunc } from "../utils/utils";
 import { NowCoderTentacle } from "./nowcoder";
 import { LuoguTentacle } from "./luogu";
+import { AtcoderTentacle } from "./atcoder";
 
 const tentaclesImpl: Record<TentacleID, Tentacle> = {
     codeforces: new CodeforcesTentacle(),
     nowcoder: new NowCoderTentacle(),
     luogu: new LuoguTentacle(),
+    atcoder: new AtcoderTentacle()
 };
 
 export async function fetchAll(logger: LogFunc): Promise<Record<string, UserProblemStatus>>

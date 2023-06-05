@@ -57,7 +57,8 @@ export const targets: Target[] = [
         accounts: {
             codeforces: "AgOH",
             nowcoder: "409383157",
-            luogu: "109757"
+            luogu: "109757",
+            atcoder: "AgOH"
         }
     }
 ];
