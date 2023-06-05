@@ -6,7 +6,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { UserCard } from "../components/UserCard";
 import { AnimatePresence, motion } from "framer-motion";
 import { GetServerSideProps } from "next";
-import { useInterval } from "react-use";
+import { useInterval, useWindowSize } from "react-use";
 import { RepeatIcon, SpinnerIcon, TriangleDownIcon } from "@chakra-ui/icons";
 import TokenDialog from "../components/TokenDialog";
 import { getNewTimedLogger, readData } from "../utils/utils";
@@ -29,23 +29,12 @@ function Home({
 
     const lastClick = useRef<number>(Date.now());
 
-    const [visibleCardCount, setVisibleCardCount] = useState(1);
+    const { width } = useWindowSize();
 
-    useEffect(() =>
+    const visibleCardCount = useMemo(() =>
     {
-        setVisibleCardCount(Math.floor(Math.min(window.innerWidth, 1280) / 300));
-
-        const onResize = () =>
-        {
-            setVisibleCardCount(Math.floor(Math.min(window.innerWidth, 1280) / 300));
-        };
-        window.addEventListener("resize", onResize);
-
-        return () =>
-        {
-            window.removeEventListener("resize", onResize);
-        };
-    }, []);
+        return Math.floor(Math.min(width, 1280) / 300);
+    }, [width]);
 
     const updateInterval = useMemo(() =>
     {

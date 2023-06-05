@@ -80,20 +80,25 @@ export function UserCard(props: UserCardProps): JSX.Element
                         ({status.submitted})
                     </Box>
                 </div>
-                {status.submitted !== 0 && groupBy(
-                    UserProblemStatus.fromObject(status).getAll(),
-                    (x: ProblemWithStatus) => `${x.platform}-${x.contest}`
-                ).sort((a, b) =>
-                {
-                    const ap = a[0];
-                    const bp = b[0];
-                    return `${ap.platform}-${ap.contest}`.localeCompare(`${bp.platform}-${bp.contest}`);
-                }).map((group, i) =>
-                {
-                    return (
-                        <ProblemGroup key={`${name}-${i}`} problems={group} />
-                    );
-                })}
+                <Box
+                    maxHeight="50vh"
+                    overflowY="auto"
+                >
+                    {status.submitted !== 0 && groupBy(
+                        UserProblemStatus.fromObject(status).getAll(),
+                        (x: ProblemWithStatus) => `${x.platform}-${x.contest}`
+                    ).sort((a, b) =>
+                    {
+                        const ap = a[0];
+                        const bp = b[0];
+                        return `${ap.platform}-${ap.contest}`.localeCompare(`${bp.platform}-${bp.contest}`);
+                    }).map((group, i) =>
+                    {
+                        return (
+                            <ProblemGroup key={`${name}-${i}`} problems={group} />
+                        );
+                    })}
+                </Box>
                 {status.submitted === 0 && (
                     <Box fontSize="1.5rem" style={{
                         display: "flex",
@@ -131,23 +136,25 @@ function ProblemGroup({
                     fontSize="0.85rem"
                 >{`${problems[0].platform} ${problems[0].contest}`}</Box>
             </div>
-            {problems.map((problem) =>
-            {
-                return (
-                    <div key={`${problem.id}`}>
-                        <Link href={problem.url} isExternal>
-                            <Box
-                                as="span"
-                                className={"codeStyle"}
-                                color={problem.success ? "green.500" : "red.500"}
-                                fontSize="1rem"
-                            >
-                                {problem.title}
-                            </Box>
-                        </Link>
-                    </div>
-                );
-            })}
+            <Box>
+                {problems.map((problem) =>
+                {
+                    return (
+                        <div key={`${problem.id}`}>
+                            <Link href={problem.url} isExternal>
+                                <Box
+                                    as="span"
+                                    className={"codeStyle"}
+                                    color={problem.success ? "green.500" : "red.500"}
+                                    fontSize="1rem"
+                                >
+                                    {problem.title}
+                                </Box>
+                            </Link>
+                        </div>
+                    );
+                })}
+            </Box>
         </div>
     );
 }
