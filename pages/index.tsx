@@ -27,6 +27,22 @@ function Home({
     const [refreshLoading, setRefreshLoading] = useState(false);
     const [nextPageLoading, setNextPageLoading] = useState(false);
 
+    const [animateCnt, setAnimateCnt] = useState(0);
+
+    const enterAnimation = useCallback(() =>
+    {
+        setAnimateCnt((cnt) => cnt + 1);
+        setNextPageLoading(true);
+    }, []);
+
+    const exitAnimation = useCallback(() =>
+    {
+        if(animateCnt === 2){
+            setNextPageLoading(false);
+            setAnimateCnt(0);
+        }
+    }, [animateCnt]);
+
     const toast = useToast();
 
     const lastClick = useRef<number>(Date.now());
@@ -158,8 +174,8 @@ function Home({
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ y: -10, opacity: 0 }}
                             transition={{ duration: 1 }}
-                            onAnimationStart={() => {setNextPageLoading(true);}}
-                            onAnimationComplete={() => {setNextPageLoading(false);}}
+                            onAnimationStart={enterAnimation}
+                            onAnimationComplete={exitAnimation}
                         >
                             <SimpleGrid columns={Math.min(visibleCardCount, visibleCards.length)} spacing={10}>
                                 {visibleCards}
