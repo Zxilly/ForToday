@@ -27,7 +27,7 @@ function Home({
     const [refreshLoading, setRefreshLoading] = useState(false);
     const [nextPageLoading, setNextPageLoading] = useState(false);
 
-    const [animateCnt, setAnimateCnt] = useState(0);
+    const [animateCnt, setAnimateCnt] = useState(1);
 
     const enterAnimation = useCallback(() =>
     {
