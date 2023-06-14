@@ -1,8 +1,8 @@
 // noinspection JSIgnoredPromiseFromCall
 
 import { Box, Container, IconButton, SimpleGrid, Stack, Tooltip, useToast } from "@chakra-ui/react";
-import { PureUserProblemStatus, UserProblemStatus } from "../types/tentacle";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { PureUserProblemStatus } from "../types/tentacle";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { UserCard } from "../components/UserCard";
 import { AnimatePresence, motion } from "framer-motion";
 import { GetServerSideProps } from "next";
@@ -13,11 +13,13 @@ import { getNewTimedLogger, readData } from "../utils/utils";
 import { client } from "../constants";
 import NoSSR from "../components/NoSSR";
 
+interface HomeProps{
+    result: Record<string, PureUserProblemStatus>;
+}
+
 function Home({
     result
-}: {
-    result: Record<string, PureUserProblemStatus>;
-})
+}: HomeProps)
 {
     const [data, setData] = useState(result);
     const [start, setStart] = useState(0);
@@ -94,21 +96,10 @@ function Home({
     {
         setStart((start + visibleCardCount) % cards.length);
         lastClick.current = Date.now();
-        setNextPageLoading(true);
-        setTimeout(() =>
-        {
-            setNextPageLoading(false);
-        }, 2000);
     }, [start, visibleCardCount, cards.length]);
 
-    useEffect(() =>
-    {
-        const timerID = setTimeout(() =>
-        {
-            goNext();
-        }, updateInterval);
-        return () => clearTimeout(timerID);
-    }, [start, visibleCardCount, cards.length, updateInterval, goNext]);
+
+    useInterval(goNext, updateInterval);
 
     return (
         <NoSSR>
@@ -158,6 +149,8 @@ function Home({
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ y: -10, opacity: 0 }}
                             transition={{ duration: 1 }}
+                            onAnimationStart={() => {setNextPageLoading(true);}}
+                            onAnimationComplete={() => {setNextPageLoading(false);}}
                         >
                             <SimpleGrid columns={Math.min(visibleCardCount, visibleCards.length)} spacing={10}>
                                 {visibleCards}
@@ -170,7 +163,7 @@ function Home({
     );
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ res }) =>
+export const getServerSideProps: GetServerSideProps<HomeProps> = async ({ res }) =>
 {
     res.setHeader("Cache-Control", "public, s-maxage=15, stale-while-revalidate=60");
 
@@ -185,7 +178,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) =>
             }
         };
     }
-    const result: Record<string, UserProblemStatus> = JSON.parse(data);
+    const result: Record<string, PureUserProblemStatus> = JSON.parse(data);
     return {
         props: {
             result
