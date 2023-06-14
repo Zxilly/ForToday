@@ -115,17 +115,26 @@ function Home({
                                     aria-label={"refresh"}
                                     icon={<RepeatIcon />}
                                     variant={"solid"}
-                                    onClick={async () =>
+                                    onClick={() =>
                                     {
-                                        await refresh();
-                                        toast({
-                                            title: "刷新成功",
-                                            status: "success",
-                                            duration: 2000,
-                                            isClosable: true,
-                                            position: "top"
-
+                                        refresh().then(() => {
+                                            toast({
+                                                title: "刷新成功",
+                                                status: "success",
+                                                duration: 2000,
+                                                isClosable: true,
+                                                position: "top"
+                                            });
+                                        }).catch(() => {
+                                            toast({
+                                                title: "刷新失败",
+                                                status: "error",
+                                                duration: 2000,
+                                                isClosable: true,
+                                                position: "top"
+                                            });
                                         });
+
                                     }}
                                 />
                             </Tooltip>
