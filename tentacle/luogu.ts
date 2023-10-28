@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosInstance, AxiosResponse, LookupAddress } from "axios";
 import * as dns from "dns";
 import * as http from "http";
 import * as https from "https";
@@ -106,19 +106,19 @@ export class LuoguTentacle implements Tentacle
     }
 }
 
-const customDNSLookup = (hostname: string, options: dns.LookupOptions, callback: (err: NodeJS.ErrnoException | null, address: string, family: number) => void): void =>
+const customDNSLookup = (hostname: string, options: dns.LookupOptions, callback: (err: NodeJS.ErrnoException | null, address: any, family: number) => void): void =>
 {
     return dns.lookup("www.luogu.com.cn.wswebpic.com", options, (err, address, family) =>
     {
-        callback(err, address as string, family);
+        callback(err, address, family);
     });
 };
 
-// 使用自定义DNS解析器配置httpAgent和httpsAgent
+
 const httpAgent = new http.Agent({ lookup: customDNSLookup });
 const httpsAgent = new https.Agent({ lookup: customDNSLookup });
 
-// 创建一个使用自定义DNS解析器的axios实例
+
 const customAxios: AxiosInstance = axios.create({
     httpAgent,
     httpsAgent
