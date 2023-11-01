@@ -33,7 +33,6 @@ export const targets: Target[] = [
             codeforces: "YuNostalgia",
             nowcoder: "210034723",
             luogu: "821080"
-            
         }
     },
     {

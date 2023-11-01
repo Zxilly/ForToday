@@ -65,7 +65,8 @@ export class LuoguTentacle implements Tentacle
         const { uid, client_id } = this.token;
 
         const helper = new ProblemHelper();
-        for(let i = 1; i <= 2; i++)
+        let latestTime = 0;
+        for(let i = 1; ; i++)
         {
             const resp = (await luoguFetch(`https://www.luogu.com.cn/record/list?user=${account}&page=${i}&_contentOnly=1`, uid, client_id)).data;
             logger(`Fetched luogu ${account} page ${i}.`);
@@ -77,6 +78,9 @@ export class LuoguTentacle implements Tentacle
             for(const record of resp.currentData.records.result)
             {
                 const time = record.submitTime;
+                if(latestTime < time) {
+                    latestTime = time;
+                }
                 if(!isValidDate(new Date(time * 1000)))
                 {
                     continue;
@@ -96,8 +100,7 @@ export class LuoguTentacle implements Tentacle
             {
                 break;
             }
-            const oldest = new Date(resp.currentData.records.result[19].submitTime);
-            if(!isValidDate(oldest))
+            if(!isValidDate(new Date(latestTime)))
             {
                 break;
             }
