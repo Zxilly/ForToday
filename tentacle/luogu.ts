@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosInstance, AxiosResponse, LookupAddress } from "axios";
+import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import * as dns from "dns";
 import * as http from "http";
 import * as https from "https";
@@ -64,8 +64,10 @@ export class LuoguTentacle implements Tentacle
 
         const { uid, client_id } = this.token;
 
+        let earliest_submission_time = new Date().getTime();
+
         const helper = new ProblemHelper();
-        for(let i = 1; i <= 2; i++)
+        for(let i = 1;; i++)
         {
             const resp = (await luoguFetch(`https://www.luogu.com.cn/record/list?user=${account}&page=${i}&_contentOnly=1`, uid, client_id)).data;
             logger(`Fetched luogu ${account} page ${i}.`);
@@ -79,7 +81,9 @@ export class LuoguTentacle implements Tentacle
                 const time = record.submitTime;
                 if(!isValidDate(new Date(time * 1000)))
                 {
-                    continue;
+                    break
+                } else {
+                    earliest_submission_time = Math.min(earliest_submission_time, time * 1000);
                 }
 
                 const id = `luogu-${record.problem.pid}`;
@@ -96,8 +100,7 @@ export class LuoguTentacle implements Tentacle
             {
                 break;
             }
-            const oldest = new Date(resp.currentData.records.result[19].submitTime);
-            if(!isValidDate(oldest))
+            if(!isValidDate(new Date(earliest_submission_time)))
             {
                 break;
             }
