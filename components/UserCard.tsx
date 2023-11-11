@@ -1,4 +1,4 @@
-import { Box, Link } from "@chakra-ui/react";
+import { Box, Link, Tooltip } from "@chakra-ui/react";
 import { groupBy, rankColor } from "../utils/utils";
 import {
 	ProblemWithStatus,
@@ -66,18 +66,24 @@ export function UserCard(props: UserCardProps): JSX.Element {
 			</Box>
 			<Box flexGrow="1" display="flex" flexDirection="column">
 				<div>
-					<Box as="span" fontSize="4rem">
-						{status.pass.length}
-					</Box>
+					<Tooltip label={"通过题目数"} placement="bottom">
+						<Box as="span" fontSize="4rem">
+							{status.pass.length}
+						</Box>
+					</Tooltip>
 					<Box as="span" fontSize="3rem" m={2}>
 						/
 					</Box>
-					<Box as="span" color="gray.600" fontSize="2rem">
-						{status.pass.length + status.failed.length}
-					</Box>
-					<Box as="span" color="gray.600" m={1} fontSize="1.5rem">
-						({status.submitted})
-					</Box>
+					<Tooltip label={"尝试题目数"} placement="bottom">
+						<Box as="span" color="gray.600" fontSize="2rem">
+							{status.pass.length + status.failed.length}
+						</Box>
+					</Tooltip>
+					<Tooltip label={"尝试数"} placement="bottom">
+						<Box as="span" color="gray.600" m={1} fontSize="1.5rem">
+							({status.submitted})
+						</Box>
+					</Tooltip>
 				</div>
 				{status.submitted !== 0 && (
 					<Box height="50vh" overflowY="auto">
