@@ -11,16 +11,16 @@
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.1.1",
-    "@chakra-ui/react": "^2.8.1",
-    "@chakra-ui/system": "^2.6.1",
+    "@chakra-ui/react": "^2.8.2",
+    "@chakra-ui/system": "^2.6.2",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
-    "@types/node": "20.8.9",
-    "@types/react": "18.2.33",
-    "@types/react-dom": "18.2.14",
-    "@typescript-eslint/eslint-plugin": "^6.9.0",
-    "@typescript-eslint/parser": "^6.9.0",
-    "axios": "^1.6.0",
+    "@types/node": "20.9.0",
+    "@types/react": "18.2.37",
+    "@types/react-dom": "18.2.15",
+    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "@typescript-eslint/parser": "^6.10.0",
+    "axios": "^1.6.1",
     "axios-retry": "^3.8.1",
     "cheerio": "1.0.0-rc.12",
     "eslint-config-prettier": "^9.0.0",
@@ -38,8 +38,8 @@
     "typescript": "5.2.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.23.2",
-    "eslint": "8.52.0",
-    "eslint-config-next": "14.0.0"
+    "@babel/core": "^7.23.3",
+    "eslint": "8.53.0",
+    "eslint-config-next": "14.0.2"
   }
 }
