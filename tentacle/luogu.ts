@@ -79,11 +79,10 @@ export class LuoguTentacle implements Tentacle
             for(const record of resp.currentData.records.result)
             {
                 const time = record.submitTime;
+                earliest_submission_time = Math.min(earliest_submission_time, time * 1000);
                 if(!isValidDate(new Date(time * 1000)))
                 {
                     break
-                } else {
-                    earliest_submission_time = Math.min(earliest_submission_time, time * 1000);
                 }
 
                 const id = `luogu-${record.problem.pid}`;
