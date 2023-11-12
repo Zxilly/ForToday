@@ -108,6 +108,19 @@ export const UpdateButton: React.FC = () => {
 							bodyRef.current.scrollTop =
 								bodyRef.current.scrollHeight;
 						};
+
+						evtSource.onerror = () => {
+							evtSource.close();
+							setLoading(false);
+							setFinished(true);
+							toast({
+								title: "爬取失败",
+								status: "error",
+								duration: 2000,
+								isClosable: false,
+								position: "top",
+							});
+						};
 					}}
 				/>
 			</Tooltip>
