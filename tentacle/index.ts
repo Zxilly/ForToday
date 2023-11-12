@@ -1,5 +1,5 @@
 import { targets } from "../constants";
-import type { Problem, Tentacle, TentacleID } from "../types/tentacle";
+import type { Tentacle, TentacleID } from "../types/tentacle";
 import { UserProblemStatus } from "../types/tentacle";
 import { LogFunc } from "../utils/utils";
 import { AtcoderTentacle } from "./atcoder";
@@ -8,10 +8,10 @@ import { LuoguTentacle } from "./luogu";
 import { NowCoderTentacle } from "./nowcoder";
 
 const tentaclesImpl: Record<TentacleID, Tentacle> = {
-    codeforces: new CodeforcesTentacle(),
-    nowcoder: new NowCoderTentacle(),
-    luogu: new LuoguTentacle(),
-    atcoder: new AtcoderTentacle()
+	codeforces: new CodeforcesTentacle(),
+	nowcoder: new NowCoderTentacle(),
+	luogu: new LuoguTentacle(),
+	atcoder: new AtcoderTentacle(),
 };
 
 export async function fetchAll(logger: LogFunc): Promise<Record<string, UserProblemStatus>>
@@ -89,24 +89,3 @@ export async function fetchAll(logger: LogFunc): Promise<Record<string, UserProb
     await Promise.all(tasks);
     return result;
 }
-
-export class ProblemHelper
-{
-    private cnt = 0;
-    private id2result : Record<string, boolean> = {};
-    private id2problem : Record<string, Problem> = {};
-
-    add_problem(id: string, result: boolean, object: Problem)
-    {
-        this.cnt++;
-        this.id2result[id] ||= result;
-        this.id2problem[id] ||= object;
-    }
-
-    get_status()
-    {
-        const passProblems : Problem[] = [], failedProblems : Problem[] = [];
-        for(const item of Object.entries(this.id2result)) (item[1] ? passProblems : failedProblems).push(this.id2problem[item[0]]);
-        return new UserProblemStatus(passProblems, failedProblems, this.cnt);
-    }
-};

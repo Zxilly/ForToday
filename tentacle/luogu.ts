@@ -2,12 +2,12 @@ import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import * as dns from "dns";
 import * as http from "http";
 import * as https from "https";
-import { ProblemHelper } from ".";
 import { client } from "../constants";
 import { LuoguSavedToken, LuoguToken } from "../types/luogu";
 import { Tentacle, UserProblemStatus } from "../types/tentacle";
 import { isValidDate, LogFunc } from "../utils/utils";
 import axiosRetry from "axios-retry";
+import { ProblemHelper } from "./helper";
 
 export class LuoguTentacle implements Tentacle
 {
@@ -30,7 +30,7 @@ export class LuoguTentacle implements Tentacle
             return false;
         }
 
-        const result = await this.check(old_token);
+        const result = await LuoguTentacle.check(old_token);
         if(!result)
         {
             logger("Luogu token invalid");
@@ -42,7 +42,7 @@ export class LuoguTentacle implements Tentacle
         return true;
     }
 
-    async check(token: LuoguToken): Promise<boolean>
+    static async check(token: LuoguToken): Promise<boolean>
     {
         const resp = (await luoguFetch("https://www.luogu.com.cn/record/list?user=109757&page=1&_contentOnly=1", token.uid, token.client_id)).data;
 
@@ -56,7 +56,7 @@ export class LuoguTentacle implements Tentacle
             throw new Error("Luogu token not found");
         }
 
-        if(!await this.check(this.token))
+        if(!await LuoguTentacle.check(this.token))
         {
             console.warn("Luogu token invalid");
             return UserProblemStatus.empty();
@@ -116,10 +116,8 @@ const customDNSLookup = (hostname: string, options: dns.LookupOptions, callback:
     });
 };
 
-
 const httpAgent = new http.Agent({ lookup: customDNSLookup });
 const httpsAgent = new https.Agent({ lookup: customDNSLookup });
-
 
 const customAxios: AxiosInstance = axios.create({
     httpAgent,

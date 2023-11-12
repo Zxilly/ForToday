@@ -10,7 +10,7 @@ import {
 import { useKey } from "react-use";
 import { LuoguToken } from "../types/luogu";
 
-const TokenDialog: React.FC = () =>
+const LuoguTokenDialog: React.FC = () =>
 {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const cancelRef = React.useRef<any>(null);
@@ -110,4 +110,4 @@ const TokenDialog: React.FC = () =>
         </AlertDialog>
     </>;
 };
-export default TokenDialog;
+export default LuoguTokenDialog;

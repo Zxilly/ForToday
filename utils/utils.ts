@@ -24,7 +24,7 @@ export function groupBy<T>(array: Array<T>, f: (arg: T) => unknown)
         .map((group) => groups[group]);
 }
 
-export type LogFunc = (message: string) => string | void;
+export type LogFunc = (message: string) => string;
 
 export function getNewTimedLogger(): LogFunc
 {
@@ -41,6 +41,7 @@ export function getNewTimedLogger(): LogFunc
         const msgt = `[${now - last}ms] ${msg}`;
         console.log(msgt);
         messages.push(msgt);
+        return msgt;
     };
 }
 

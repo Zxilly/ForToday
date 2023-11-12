@@ -1,7 +1,7 @@
 import { load } from "cheerio";
-import { ProblemHelper } from ".";
 import { Tentacle, UserProblemStatus } from "../types/tentacle";
 import { LogFunc, isValidDate } from "../utils/utils";
+import { ProblemHelper } from "./helper";
 
 export class NowCoderTentacle implements Tentacle
 {

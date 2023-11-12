@@ -1,6 +1,6 @@
-import { ProblemHelper } from ".";
 import { Tentacle, UserProblemStatus } from "../types/tentacle";
 import { CRAWL_DAY, LogFunc } from "../utils/utils";
+import { ProblemHelper } from "./helper";
 
 export class AtcoderTentacle implements Tentacle
 {
