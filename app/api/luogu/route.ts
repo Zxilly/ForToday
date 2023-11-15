@@ -3,6 +3,9 @@ import { getNewTimedLogger } from "../../../utils/utils";
 import { LuoguSavedToken, LuoguToken } from "../../../types/luogu";
 import { LuoguTentacle } from "../../../tentacle/luogu";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 export async function POST(request: Request) {
 	const logger = getNewTimedLogger();
 

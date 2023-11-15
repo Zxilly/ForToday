@@ -1,6 +1,9 @@
 import { client } from "../../../constants";
 import { getNewTimedLogger, readData } from "../../../utils/utils";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 export async function GET() {
 	const logger = getNewTimedLogger();
 
