@@ -28,15 +28,6 @@ export const targets: Target[] = [
         }
     },
     {
-        name: "YuNostalgia",
-        accounts: {
-            codeforces: "YuNostalgia",
-            nowcoder: "210034723",
-            luogu: "821080"
-            
-        }
-    },
-    {
         name: "Jaysea",
         accounts: {
             codeforces: "Jaysea",
