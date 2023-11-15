@@ -4,6 +4,15 @@ import Redis from "ioredis";
 
 export const targets: Target[] = [
     {
+        name: "AgOH",
+        accounts: {
+            codeforces: "AgOH",
+            nowcoder: "409383157",
+            luogu: "109757",
+            atcoder: "AgOH"
+        }
+    },
+    {
         name: "Eronano",
         accounts: {
             codeforces: "Eronano",
