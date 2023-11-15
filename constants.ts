@@ -13,6 +13,14 @@ export const targets: Target[] = [
         }
     },
     {
+        name: "Algor_",
+        accounts: {
+            codeforces: "Algor_",
+            nowcoder: "490231204",
+            luogu: "595131"
+        }
+    },
+    {
         name: "Eronano",
         accounts: {
             codeforces: "Eronano",
