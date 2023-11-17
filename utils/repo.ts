@@ -8,7 +8,7 @@ export async function readData(
 	log?: LogFunc,
 ): Promise<Record<string, PureUserProblemStatus> | null> {
 	log?.("Reading data...");
-	const data = await client.get<any>("data");
+	const data = await client.get<Record<string, PureUserProblemStatus>>("data");
 	log?.("Read data.");
 	if (!data) {
 		log?.("Data not found.");
@@ -22,7 +22,7 @@ export async function writeData(
 	log?: LogFunc,
 ): Promise<void> {
 	log?.("Writing data...");
-	await client.set("data", JSON.stringify(data));
+	await client.set("data", data);
 	log?.("Wrote data.");
 }
 
@@ -30,13 +30,13 @@ export async function readLuoguToken(
 	log?: LogFunc,
 ): Promise<LuoguSavedToken | null> {
 	log?.("Reading luogu token...");
-	const data = await client.get<string>("luogu_token");
+	const data = await client.get<LuoguSavedToken>("luogu_token");
 	if (!data) {
 		log?.("Luogu token not found.");
 		return null;
 	}
 	log?.("Read luogu token.");
-	return JSON.parse(data);
+	return data;
 }
 
 export async function writeLuoguToken(
@@ -44,7 +44,7 @@ export async function writeLuoguToken(
 	log?: LogFunc,
 ): Promise<void> {
 	log?.("Writing luogu token...");
-	await client.set("luogu_token", JSON.stringify(token));
+	await client.set("luogu_token", token);
 	log?.("Wrote luogu token.");
 }
 
