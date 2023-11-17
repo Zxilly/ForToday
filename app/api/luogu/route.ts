@@ -3,7 +3,7 @@ import { LuoguToken } from "../../../types/luogu";
 import { LuoguTentacle } from "../../../tentacle/luogu";
 import { writeLuoguToken } from "../../../utils/repo";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
