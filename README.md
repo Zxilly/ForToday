@@ -20,7 +20,7 @@
 ## 使用方法
 
 1. 修改 `constants.ts` 中的 `targets`
-2. 部署到 `vercel`，同时启动一个 `redis` 实例，并将 `REDIS_URL` 设置为 `redis` 实例的连接地址
+2. 部署到 `vercel`，同时启动一个  UPSTASH `redis` 实例，并设置 `UPSTASH_REDIS_REST_URL` 和 `UPSTASH_REDIS_REST_TOKEN` 两个环境变量。
 
 ## LICENSE
 

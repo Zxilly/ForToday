@@ -1,5 +1,4 @@
 import moment from "moment-timezone";
-import Redis from "ioredis";
 
 export const CRAWL_DAY = 7;
 
@@ -43,14 +42,6 @@ export function getNewTimedLogger(): LogFunc
         messages.push(msgt);
         return msgt;
     };
-}
-
-export async function readData(client: Redis, log?: LogFunc): Promise<string | null>
-{
-    log?.("Reading data...");
-    const data = await client.get("data");
-    log?.("Read data.");
-    return data;
 }
 
 export function rankParse(rank: number)

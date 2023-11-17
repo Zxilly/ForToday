@@ -1,9 +1,9 @@
-import { client } from "../../../constants";
 import { getNewTimedLogger } from "../../../utils/utils";
-import { LuoguSavedToken, LuoguToken } from "../../../types/luogu";
+import { LuoguToken } from "../../../types/luogu";
 import { LuoguTentacle } from "../../../tentacle/luogu";
+import { writeLuoguToken } from "../../../utils/repo";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
@@ -31,13 +31,13 @@ export async function POST(request: Request) {
 	}
 
 	logger("Saving...");
-	await client.set(
-		"luogu_token",
-		JSON.stringify({
+	await writeLuoguToken(
+		{
 			uid,
 			client_id,
 			timestamp: new Date().getTime(),
-		} as LuoguSavedToken),
+		},
+		logger,
 	);
 	logger("Saved.");
 	return Response.json({ message: "OK", time: new Date().getTime() });

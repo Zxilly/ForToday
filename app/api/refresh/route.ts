@@ -1,6 +1,6 @@
 import { fetchAll } from "../../../tentacle";
-import { client } from "../../../constants";
 import { getNewTimedLogger } from "../../../utils/utils";
+import { acquireDataLock, releaseDataLock, writeData } from "../../../utils/repo";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -23,23 +23,17 @@ export async function GET() {
 
 			(async () => {
 				logAndWrite("Adding lock...");
-				const lock = await client.setnx("lock", "1");
-				if (!lock) {
-					logAndWrite("Lock exists, aborting...");
-					finish();
-					return;
-				}
-				await client.expire("lock", 15);
+				await acquireDataLock(logAndWrite);
 				logAndWrite("Lock added.");
 
 				logAndWrite("Fetching...");
 				const data = await fetchAll(logAndWrite);
 				logAndWrite("Fetched.");
 				logAndWrite("Saving...");
-				await client.set("data", JSON.stringify(data));
+				await writeData(data as any);
 				logAndWrite("Saved.");
 				logAndWrite("Removing lock...");
-				await client.del("lock");
+				await releaseDataLock(logAndWrite);
 				logAndWrite("Lock removed.");
 				finish();
 			})();

@@ -76,7 +76,7 @@ function Cards({
 
 	const sortedData = useMemo(() => {
 		return Object.entries(data).sort((a, b) => {
-			return a[1].rank - b[1].rank;
+			return -(a[1].rank - b[1].rank);
 		});
 	}, [data]);
 

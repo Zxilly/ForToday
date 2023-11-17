@@ -2,12 +2,12 @@ import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import * as dns from "dns";
 import * as http from "http";
 import * as https from "https";
-import { client } from "../constants";
 import { LuoguSavedToken, LuoguToken } from "../types/luogu";
 import { Tentacle, UserProblemStatus } from "../types/tentacle";
 import { isValidDate, LogFunc } from "../utils/utils";
 import axiosRetry from "axios-retry";
 import { ProblemHelper } from "./helper";
+import { readLuoguToken } from "../utils/repo";
 
 export class LuoguTentacle implements Tentacle
 {
@@ -15,29 +15,28 @@ export class LuoguTentacle implements Tentacle
 
     async requireAuth(logger: LogFunc): Promise<boolean>
     {
-        const token = await client.get("luogu_token");
+        const token = await readLuoguToken(logger)
         if(!token)
         {
             logger("Luogu token not found");
             return false;
         }
 
-        const old_token = JSON.parse(token) as LuoguSavedToken;
-        const { uid, client_id, timestamp } = old_token;
+        const { uid, client_id, timestamp } = token;
         if(!uid || !client_id || !timestamp || new Date().getTime() - timestamp > 1000 * 60 * 60 * 24 * 30)
         {
             logger("Luogu token invalid");
             return false;
         }
 
-        const result = await LuoguTentacle.check(old_token);
+        const result = await LuoguTentacle.check(token);
         if(!result)
         {
             logger("Luogu token invalid");
             return false;
         }
 
-        this.token = old_token;
+        this.token = token;
 
         return true;
     }
