@@ -122,16 +122,20 @@ function Cards({
 		setNextPageLoading(false);
 	}, []);
 
+	const indicatorVisible = useMemo(() => {
+		return visibleCardCount !== 1;
+	}, [visibleCardCount]);
+
 	return (
 		<NoSSR>
 			<ChakraProvider>
 				<LuoguTokenDialog />
 				<Container
-					width={"calc(100vw - 2rem)"}
+					width={indicatorVisible ? "calc(100vw - 2rem)": "100vw"}
 					height={"100%"}
 					maxW="container.xl"
 				>
-					{visibleCardCount !== 1 && (
+					{indicatorVisible && (
 						<Box className={"activeCardIndicator"}>
 							<Stack direction={"column"} spacing={6}>
 								<UpdateButton />
