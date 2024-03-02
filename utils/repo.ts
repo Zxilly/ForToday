@@ -1,5 +1,5 @@
 import { LuoguSavedToken } from "../types/luogu";
-import { client } from "../constants";
+import { client } from "../constant/server-consts";
 import { PureUserProblemStatus } from "../types/tentacle";
 import { LogFunc } from "./utils";
 import "server-only";

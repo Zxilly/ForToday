@@ -12,7 +12,7 @@
 -   [Codeforces](https://codeforces.com/)
 -   [NowCoder](https://ac.nowcoder.com/)
 
-> Codeforces 支持获取组织内部 VP 的数据，需要设置 `constants.ts` 中的 `CODEFORCES_GROUP_ID`
+> Codeforces 支持获取组织内部 VP 的数据，需要设置 `server-consts.ts` 中的 `CODEFORCES_GROUP_ID`
 
 > 由于洛谷的平台限制，爬取数据需要一个洛谷账号的 cookies，可以在网页中按 `Ctrl + Q` 后输入自己的洛谷 `Cookie`
 
@@ -20,7 +20,7 @@
 
 ## 使用方法
 
-1. 修改 `constants.ts` 中的 `targets`
+1. 修改 `constant/consts.ts` 中的 `targets` 变量，设置需要统计的用户列表
 2. 部署到 `vercel`，同时启动一个 UPSTASH `redis` 实例，并设置 `UPSTASH_REDIS_REST_URL` 和 `UPSTASH_REDIS_REST_TOKEN` 两个环境变量。
 
 > 如果需要爬取 CodeForces 组织内部 VP 数据，需要设置 `CODEFORCES_GROUP_ID` 环境变量。

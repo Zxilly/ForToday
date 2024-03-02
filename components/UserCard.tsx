@@ -5,27 +5,28 @@ import {
 	PureUserProblemStatus,
 	UserProblemStatus,
 } from "../types/tentacle";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import Lottie from "lottie-react";
 import animationA from "../animation/A.json";
 import animationB from "../animation/B.json";
 import animationC from "../animation/C.json";
+import { targets } from "../constant/consts";
 
 export type UserCardProps = {
 	name: string;
 	status: PureUserProblemStatus;
 };
 
-export function UserCard(props: UserCardProps): JSX.Element {
+export function UserCard(props: UserCardProps): React.JSX.Element {
 	const { name, status } = props;
 	const color =
-		status.rank !== undefined && status.rank >= 0
-			? rankColor(status.rank)
+		status.level !== undefined && status.level >= 0
+			? rankColor(status.level)
 			: "black";
 
 	const [animation, setAnimation] = React.useState<any>(animationA);
 	useEffect(() => {
-		switch ((status.rank + 1) % 3) {
+		switch ((status.level + 1) % 3) {
 			case 0:
 				setAnimation(animationA);
 				break;
@@ -36,7 +37,18 @@ export function UserCard(props: UserCardProps): JSX.Element {
 				setAnimation(animationC);
 				break;
 		}
-	}, [status.rank]);
+	}, [status.level]);
+
+	const getNameElement = useCallback((name: string) => {
+		const cfName = targets.find((x) => x.name === name)!.accounts
+			.codeforces;
+
+		return (
+			<Link href={`https://codeforces.com/profile/${cfName}`} isExternal>
+				{name}
+			</Link>
+		);
+	}, []);
 
 	return (
 		<Box
@@ -62,7 +74,13 @@ export function UserCard(props: UserCardProps): JSX.Element {
 				noOfLines={1}
 				color={color}
 			>
-				{name}
+				{status.rank >= 0 ? (
+					<Tooltip label={`Rank: ${status.rank}`} placement="right">
+						{getNameElement(name)}
+					</Tooltip>
+				) : (
+					<>{getNameElement(name)}</>
+				)}
 			</Box>
 			<Box flexGrow="1" display="flex" flexDirection="column">
 				<div>
@@ -86,7 +104,13 @@ export function UserCard(props: UserCardProps): JSX.Element {
 					</Tooltip>
 				</div>
 				{status.submitted !== 0 && (
-					<Box height="50vh" overflowY="auto">
+					<Box
+						height="50vh"
+						overflowY="auto"
+						style={{
+							scrollbarWidth: "thin",
+						}}
+					>
 						{groupBy(
 							UserProblemStatus.fromObject(status).getAll(),
 							(x: ProblemWithStatus) =>

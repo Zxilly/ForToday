@@ -76,7 +76,7 @@ function Cards({
 
 	const sortedData = useMemo(() => {
 		return Object.entries(data).sort((a, b) => {
-			return -(a[1].rank - b[1].rank);
+			return -(a[1].level - b[1].level);
 		});
 	}, [data]);
 
@@ -133,7 +133,7 @@ function Cards({
 				<Container
 					width={indicatorVisible ? "calc(100vw - 2rem)" : "100vw"}
 					height={"100%"}
-					maxW="container.xl"
+					maxW="1440px"
 				>
 					{indicatorVisible && (
 						<Box className={"activeCardIndicator"}>
