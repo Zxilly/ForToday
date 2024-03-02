@@ -1,5 +1,5 @@
 import { Box, Link, Tooltip } from "@chakra-ui/react";
-import { groupBy, rankColor } from "../utils/utils";
+import { groupBy, ratingColor } from "../utils/utils";
 import {
 	ProblemWithStatus,
 	PureUserProblemStatus,
@@ -21,7 +21,7 @@ export function UserCard(props: UserCardProps): React.JSX.Element {
 	const { name, status } = props;
 	const color =
 		status.level !== undefined && status.level >= 0
-			? rankColor(status.level)
+			? ratingColor(status.level)
 			: "black";
 
 	const [animation, setAnimation] = React.useState<any>(animationA);
@@ -45,7 +45,9 @@ export function UserCard(props: UserCardProps): React.JSX.Element {
 
 		return (
 			<Link href={`https://codeforces.com/profile/${cfName}`} isExternal>
-				{name}
+				<Box as="span" fontWeight="semibold" fontSize="xl">
+					{name}
+				</Box>
 			</Link>
 		);
 	}, []);
@@ -59,29 +61,32 @@ export function UserCard(props: UserCardProps): React.JSX.Element {
 			borderColor={color}
 			overflow="hidden"
 			style={{
-				background: `linear-gradient(250deg, ${color} 2rem, var(--chakra-colors-chakra-body-bg) 0)`,
+				background: `linear-gradient(250deg, ${color} 4rem, var(--chakra-colors-chakra-body-bg) 0)`,
 				display: "flex",
 				flexDirection: "column",
 				justifyContent: "flex-start",
+				position: "relative",
 			}}
 		>
-			<Box
-				mt="1"
-				fontWeight="semibold"
-				fontSize="xl"
-				as="h1"
-				lineHeight="tight"
-				noOfLines={1}
-				color={color}
-			>
-				{status.rank >= 0 ? (
-					<Tooltip label={`Rank: ${status.rank}`} placement="right">
-						{getNameElement(name)}
-					</Tooltip>
-				) : (
-					<>{getNameElement(name)}</>
-				)}
+			<Box mt="1" as="div" lineHeight="tight" noOfLines={1} color={color}>
+				{getNameElement(name)}
 			</Box>
+			{status.rating >= 0 && (
+				<Box
+					style={{
+						position: "absolute",
+						top: "2rem",
+						right: "0",
+						transform: "rotate(70deg)",
+						fontSize: "1.5rem",
+						fontWeight: "bold",
+						color: "white",
+					}}
+				>
+					{status.rating}
+				</Box>
+			)}
+
 			<Box flexGrow="1" display="flex" flexDirection="column">
 				<div>
 					<Tooltip label={"通过题目数"} placement="bottom">

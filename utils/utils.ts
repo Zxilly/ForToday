@@ -41,33 +41,33 @@ export function getNewTimedLogger(): LogFunc {
 	};
 }
 
-export function rankParse(rank: number) {
-	if (rank <= 0) {
+export function ratingParse(rating: number) {
+	if (rating <= 0) {
 		return -1;
-	} else if (rank < 1200) {
+	} else if (rating < 1200) {
 		return 0;
-	} else if (rank < 1400) {
+	} else if (rating < 1400) {
 		return 1;
-	} else if (rank < 1600) {
+	} else if (rating < 1600) {
 		return 2;
-	} else if (rank < 1900) {
+	} else if (rating < 1900) {
 		return 3;
-	} else if (rank < 2100) {
+	} else if (rating < 2100) {
 		return 4;
-	} else if (rank < 2300) {
+	} else if (rating < 2300) {
 		return 5;
-	} else if (rank < 2400) {
+	} else if (rating < 2400) {
 		return 6;
-	} else if (rank < 2600) {
+	} else if (rating < 2600) {
 		return 7;
-	} else if (rank < 3000) {
+	} else if (rating < 3000) {
 		return 8;
 	} else {
 		return 9;
 	}
 }
 
-export function rankColor(rank: number) {
+export function ratingColor(rank: number) {
 	switch (rank) {
 		case -1:
 			return "black";

@@ -6,7 +6,7 @@ import {
 } from "../types/tentacle";
 import { load } from "cheerio";
 import { CODEFORCES_GROUP_ID } from "../constant/server-consts";
-import { isValidDate, LogFunc, rankParse } from "../utils/utils";
+import { isValidDate, LogFunc, ratingParse } from "../utils/utils";
 import { slowAES, toHex, toNumbers } from "../utils/cf";
 import retryFetch from "fetch-retry";
 
@@ -45,18 +45,18 @@ export class CodeforcesTentacle implements Tentacle {
 		const passProblemIds = new Set<string>();
 		const problems = new Array<Problem>();
 
-		const rankResp = await this.fakeFetch(
+		const ratingResp = await this.fakeFetch(
 			`https://codeforces.com/profile/${account}`,
 		).then((res) => res.text());
-		const rankDom = load(rankResp);
-		const rankStr = rankDom(".info")
+		const ratingDom = load(ratingResp);
+		const ratingStr = ratingDom(".info")
 			.find("li")
 			.eq(0)
 			.find("span")
 			.eq(0)
 			.text();
-		const rank = parseInt(rankStr, 10);
-		const level = rankParse(rank);
+		const rating = parseInt(ratingStr, 10);
+		const level = ratingParse(rating);
 
 		const resp = await this.fakeFetch(
 			`https://codeforces.com/submissions/${account}`,
@@ -148,7 +148,7 @@ export class CodeforcesTentacle implements Tentacle {
 			failedProblems,
 			problems.length,
 			level,
-			rank,
+			rating,
 		);
 	}
 

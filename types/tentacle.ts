@@ -22,20 +22,20 @@ export class UserProblemStatus {
 	failed: Problem[];
 	submitted: number;
 	level = -1;
-	rank = -1;
+	rating = -1;
 
 	constructor(
 		pass: Problem[],
 		failed: Problem[],
 		submitted: number,
 		level = -1,
-		rank = -1,
+		rating = -1,
 	) {
 		this.pass = pass;
 		this.failed = failed;
 		this.submitted = submitted;
 		this.level = level;
-		this.rank = rank;
+		this.rating = rating;
 	}
 
 	public static fromObject(obj: PureUserProblemStatus): UserProblemStatus {
@@ -44,7 +44,7 @@ export class UserProblemStatus {
 			obj.failed,
 			obj.submitted,
 			obj.level,
-			obj.rank,
+			obj.rating,
 		);
 	}
 
@@ -63,7 +63,7 @@ export class UserProblemStatus {
 		const pass: Set<Problem> = new Set();
 		const failed: Set<Problem> = new Set();
 		let submitted = 0;
-		let rank = -1;
+		let rating = -1;
 		let level = -1;
 		for (const status of statuses) {
 			for (const problem of status.pass) {
@@ -76,8 +76,8 @@ export class UserProblemStatus {
 			if (status.level !== undefined && status.level >= 0) {
 				level = status.level;
 			}
-			if (status.rank !== undefined && status.rank >= 0) {
-				rank = status.rank;
+			if (status.rating !== undefined && status.rating >= 0) {
+				rating = status.rating;
 			}
 		}
 		return new UserProblemStatus(
@@ -85,7 +85,7 @@ export class UserProblemStatus {
 			Array.from(failed),
 			submitted,
 			level,
-			rank,
+			rating,
 		);
 	}
 
