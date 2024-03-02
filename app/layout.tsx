@@ -6,6 +6,8 @@ export const metadata: Metadata = {
 	title: "Seven days",
 };
 
+export const runtime = "edge"
+
 export default function RootLayout({
 	children,
 }: {

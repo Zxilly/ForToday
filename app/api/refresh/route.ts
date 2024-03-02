@@ -6,7 +6,7 @@ import {
 	writeData,
 } from "../../../utils/repo";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
@@ -24,10 +24,18 @@ export async function GET() {
 				controller.enqueue(encoder.encode("event: finish\ndata: \n\n"));
 				controller.close();
 			};
+			const error = () => {
+				controller.enqueue(encoder.encode("event: error\ndata: \n\n"));
+				controller.close();
+			}
 
 			(async () => {
 				logAndWrite("Adding lock...");
-				await acquireDataLock(logAndWrite);
+				const haveLock = await acquireDataLock(logAndWrite);
+				if (!haveLock) {
+					error()
+					return;
+				}
 				logAndWrite("Lock added.");
 
 				logAndWrite("Fetching...");

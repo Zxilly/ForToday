@@ -4,13 +4,12 @@ import { UserProblemStatus } from "../types/tentacle";
 import { LogFunc } from "../utils/utils";
 import { AtcoderTentacle } from "./atcoder";
 import { CodeforcesTentacle } from "./codeforces";
-import { LuoguTentacle } from "./luogu";
 import { NowCoderTentacle } from "./nowcoder";
 
-const tentaclesImpl: Record<TentacleID, Tentacle> = {
+const tentaclesImpl: Partial<Record<TentacleID, Tentacle>> = {
 	codeforces: new CodeforcesTentacle(),
 	nowcoder: new NowCoderTentacle(),
-	luogu: new LuoguTentacle(),
+	// luogu: new LuoguTentacle(), // FIXME: disable luogu for now, for edge runtime
 	atcoder: new AtcoderTentacle(),
 };
 

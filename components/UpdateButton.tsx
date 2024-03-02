@@ -109,7 +109,8 @@ export const UpdateButton: React.FC = () => {
 								bodyRef.current.scrollHeight;
 						};
 
-						evtSource.onerror = () => {
+						const errorHandler = () =>
+						{
 							evtSource.close();
 							setLoading(false);
 							setFinished(true);
@@ -120,7 +121,9 @@ export const UpdateButton: React.FC = () => {
 								isClosable: false,
 								position: "top",
 							});
-						};
+						}
+						evtSource.onerror = errorHandler;
+						evtSource.addEventListener("error", errorHandler);
 					}}
 				/>
 			</Tooltip>
