@@ -2,7 +2,7 @@
 
 统计算法竞赛选手最近 7 天内的解题数量
 
-![image](https://github.com/Zxilly/ForToday/assets/31370133/0a37cf94-f8da-47cc-be3b-664e03ff1164)
+![image](https://github.com/Zxilly/ForToday/assets/31370133/d4995a32-0ebf-426c-88b7-3361973802b0)
 
 ## 支持
 
