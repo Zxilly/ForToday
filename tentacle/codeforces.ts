@@ -41,7 +41,7 @@ export class CodeforcesTentacle implements Tentacle {
 		return true;
 	}
 
-	async fetch(account: string, _logger: LogFunc): Promise<UserProblemStatus> {
+	async fetch(account: string, logger: LogFunc): Promise<UserProblemStatus> {
 		const passProblemIds = new Set<string>();
 		const problems = new Array<Problem>();
 
@@ -63,29 +63,54 @@ export class CodeforcesTentacle implements Tentacle {
 		).then((res) => res.text());
 		const dom = load(resp);
 
-		// const table = dom.querySelector("table.status-frame-datatable");
+		const unofficial = dom("#showUnofficial");
+		// check unofficial has "checked" attribute
+		if (unofficial.attr("checked") === undefined) {
+			logger("Unofficial is not checked");
+		}
+
 		const table = dom("table.status-frame-datatable");
 		if (table === null) return UserProblemStatus.empty();
 		const rows = table.find("tr:not(.first-row)");
 		rows.each((_, row) => {
 			const cells = dom(row).find("td");
 			const time = dom(cells).find("span.format-time");
-			if (!time.length) return;
+			if (!time.length) {
+				logger(`No time found in row ${row} of ${account}`);
+				return;
+			}
 			const timeStr = time.text()?.trim();
-			if (!timeStr.length) return;
+			if (!timeStr.length) {
+				logger(`No time string found in row ${row} of ${account}`);
+				return;
+			}
 			const date = new Date(timeStr);
-			if (!isValidDate(date)) return;
+			if (!isValidDate(date)) {
+				return;
+			}
 			const problemName = dom(cells[3]).text()?.trim();
-			if (!problemName.length) return;
+			if (!problemName.length) {
+				logger(`No problem name found in row ${row} of ${account}`);
+				return;
+			}
 			const url = dom(cells[3]).find("a").attr("href");
-			if (!url) return;
+			if (!url) {
+				logger(`No url found in row ${row} of ${account}`);
+				return;
+			}
 			const problemRE = new RegExp(
 				"\\/contest\\/(?<contest>\\d*)\\/problem/.*",
 			);
 			const match = url.match(problemRE);
-			if (!match) return;
+			if (!match) {
+				logger(`No match found in row ${row} of ${account}`);
+				return;
+			}
 			const contest = match.groups?.contest;
-			if (!contest) return;
+			if (!contest) {
+				logger(`No contest found in row ${row} of ${account}`);
+				return;
+			}
 			const name = `${problemName}`;
 
 			// const status = row.querySelector("span.verdict-accepted");
@@ -184,9 +209,6 @@ export class CodeforcesTentacle implements Tentacle {
 							`Fetched Codeforces contest ${contestNames[j]} submissions page ${i}.`,
 						);
 						const $ = load(response);
-						logger(
-							`Parsed Codeforces contest ${contestNames[j]} submissions page ${i}.`,
-						);
 
 						if (i !== 1) {
 							const pageIndex = $("span.page-index.active");
@@ -220,8 +242,13 @@ export class CodeforcesTentacle implements Tentacle {
 								?.trim()
 								.replaceAll("\n", "")
 								.trim();
-							if (!submitUser) return;
-							if (!accounts.includes(submitUser)) return;
+							if (!submitUser) {
+								logger(`No submit user found in row ${row}`);
+								return;
+							}
+							if (!accounts.includes(submitUser)) {
+								return;
+							}
 
 							const problemID = $(cells.children().eq(3))
 								.text()
