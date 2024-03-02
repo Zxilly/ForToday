@@ -8,7 +8,8 @@ export async function readData(
 	log?: LogFunc,
 ): Promise<Record<string, PureUserProblemStatus> | null> {
 	log?.("Reading data...");
-	const data = await client.get<Record<string, PureUserProblemStatus>>("data");
+	const data =
+		await client.get<Record<string, PureUserProblemStatus>>("data");
 	log?.("Read data.");
 	if (!data) {
 		log?.("Data not found.");

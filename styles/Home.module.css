@@ -1,15 +1,15 @@
 .statusClip {
-    height: 2.5rem;
-    width: 2.5rem;
-    border-radius: 0!important;
+	height: 2.5rem;
+	width: 2.5rem;
+	border-radius: 0 !important;
 }
 
 .statusClipGroup {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    border-radius: 0.5rem;
-    overflow: hidden;
-    border-width: 1px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	border-radius: 0.5rem;
+	overflow: hidden;
+	border-width: 1px;
 }

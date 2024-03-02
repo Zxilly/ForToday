@@ -131,7 +131,7 @@ function Cards({
 			<ChakraProvider>
 				<LuoguTokenDialog />
 				<Container
-					width={indicatorVisible ? "calc(100vw - 2rem)": "100vw"}
+					width={indicatorVisible ? "calc(100vw - 2rem)" : "100vw"}
 					height={"100%"}
 					maxW="container.xl"
 				>

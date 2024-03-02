@@ -1,6 +1,10 @@
 import { fetchAll } from "../../../tentacle";
 import { getNewTimedLogger } from "../../../utils/utils";
-import { acquireDataLock, releaseDataLock, writeData } from "../../../utils/repo";
+import {
+	acquireDataLock,
+	releaseDataLock,
+	writeData,
+} from "../../../utils/repo";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -19,7 +23,7 @@ export async function GET() {
 			const finish = () => {
 				controller.enqueue(encoder.encode("event: finish\ndata: \n\n"));
 				controller.close();
-			}
+			};
 
 			(async () => {
 				logAndWrite("Adding lock...");
