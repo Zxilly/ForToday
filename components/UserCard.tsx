@@ -157,7 +157,7 @@ function ProblemGroup({
 	problems,
 }: {
 	problems: ProblemWithStatus[];
-}): JSX.Element {
+}): React.JSX.Element {
 	if (problems.length === 0) {
 		return <></>;
 	}

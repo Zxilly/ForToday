@@ -1,4 +1,4 @@
-import { targets } from "../constants";
+import { targets } from "../constant/consts";
 import type { Tentacle, TentacleID } from "../types/tentacle";
 import { UserProblemStatus } from "../types/tentacle";
 import { LogFunc } from "../utils/utils";
