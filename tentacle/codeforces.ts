@@ -69,7 +69,7 @@ export class CodeforcesTentacle implements Tentacle {
 			// get token
 			const token = form.find("input[name=csrf_token]").attr("value");
 			if (!token) {
-				logger("No token found");
+				logger(`No token found, ${form.html()}`);
 				this._lock.release();
 				return UserProblemStatus.empty();
 			}
