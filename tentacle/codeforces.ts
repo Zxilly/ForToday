@@ -8,14 +8,11 @@ import { load } from "cheerio";
 import { CODEFORCES_GROUP_ID } from "../constant/server-consts";
 import { isValidDate, LogFunc, ratingParse } from "../utils/utils";
 import { slowAES, toHex, toNumbers } from "../utils/cf";
-import retryFetch from "fetch-retry";
-
-const rf = retryFetch(fetch, {
-	retries: 3,
-});
+import AwaitLock from "await-lock";
 
 export class CodeforcesTentacle implements Tentacle {
 	private _token = "";
+	private _lock = new AwaitLock();
 
 	async requireAuth(logger: LogFunc): Promise<boolean> {
 		const resp = await fetch("https://codeforces.com/").then((r) =>
@@ -58,16 +55,31 @@ export class CodeforcesTentacle implements Tentacle {
 		const rating = parseInt(ratingStr, 10);
 		const level = ratingParse(rating);
 
-		const resp = await this.fakeFetch(
-			`https://codeforces.com/submissions/${account}`,
-		).then((res) => res.text());
-		const dom = load(resp);
+		await this._lock.acquireAsync();
+		const subUrl = `https://codeforces.com/submissions/${account}`;
+		const resp = await this.fakeFetch(subUrl).then((res) => res.text());
+		let dom = load(resp);
 
 		const unofficial = dom("#showUnofficial");
 		// check unofficial has "checked" attribute
 		if (unofficial.attr("checked") === undefined) {
 			logger("Unofficial is not checked");
+			// get parent form
+			const form = unofficial.parent("form");
+			// get token
+			const token = form.find("input[name=csrf_token]").attr("value");
+			if (!token) {
+				logger("No token found");
+				this._lock.release();
+				throw new Error("No token found");
+			}
+			// trigger unofficial
+			const resp = await this.triggerUnofficial(subUrl, token).then(
+				(res) => res.text(),
+			);
+			dom = load(resp);
 		}
+		this._lock.release();
 
 		const table = dom("table.status-frame-datatable");
 		if (table === null) return UserProblemStatus.empty();
@@ -323,7 +335,24 @@ export class CodeforcesTentacle implements Tentacle {
 	}
 
 	async fakeFetch(url: string) {
-		return await rf(url, {
+		return await fetch(url, {
+			headers: {
+				"User-Agent":
+					"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+				Cookie: `RCPC=${this._token};`,
+			},
+		});
+	}
+
+	async triggerUnofficial(url: string, token: string) {
+		const data = new FormData();
+		data.append("csrf_token", token);
+		data.append("action", "toggleShowUnofficial");
+		data.append("_tta", "5");
+		return await fetch(url, {
+			method: "POST",
+			redirect: "follow",
+			body: data,
 			headers: {
 				"User-Agent":
 					"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
