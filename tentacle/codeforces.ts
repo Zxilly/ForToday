@@ -71,7 +71,7 @@ export class CodeforcesTentacle implements Tentacle {
 			if (!token) {
 				logger("No token found");
 				this._lock.release();
-				throw new Error("No token found");
+				return UserProblemStatus.empty();
 			}
 			// trigger unofficial
 			const resp = await this.triggerUnofficial(subUrl, token).then(
@@ -85,15 +85,16 @@ export class CodeforcesTentacle implements Tentacle {
 		if (table === null) return UserProblemStatus.empty();
 		const rows = table.find("tr:not(.first-row)");
 		rows.each((_, row) => {
+			const h = dom(row).html();
 			const cells = dom(row).find("td");
 			const time = dom(cells).find("span.format-time");
 			if (!time.length) {
-				logger(`No time found in row ${row} of ${account}`);
+				logger(`No time found in row ${h} of ${account}`);
 				return;
 			}
 			const timeStr = time.text()?.trim();
 			if (!timeStr.length) {
-				logger(`No time string found in row ${row} of ${account}`);
+				logger(`No time string found in row ${h} of ${account}`);
 				return;
 			}
 			const date = new Date(timeStr);
@@ -102,38 +103,45 @@ export class CodeforcesTentacle implements Tentacle {
 			}
 			const problemName = dom(cells[3]).text()?.trim();
 			if (!problemName.length) {
-				logger(`No problem name found in row ${row} of ${account}`);
+				logger(`No problem name found in row ${h} of ${account}`);
 				return;
 			}
 			const url = dom(cells[3]).find("a").attr("href");
 			if (!url) {
-				logger(`No url found in row ${row} of ${account}`);
+				logger(`No url found in row ${h} of ${account}`);
 				return;
 			}
-			const problemRE = new RegExp(
-				"\\/contest\\/(?<contest>\\d*)\\/problem/.*",
-			);
+			const problemRE = /\/(contest|gym)\/(?<contest>\d*)\/problem\/.*/;
 			const match = url.match(problemRE);
 			if (!match) {
-				logger(`No match found in row ${row} of ${account}`);
+				logger(
+					`No match found in row ${row} of ${account}, url: ${url}`,
+				);
 				return;
 			}
 			const contest = match.groups?.contest;
 			if (!contest) {
-				logger(`No contest found in row ${row} of ${account}`);
+				logger(`No contest found in row ${h} of ${account}`);
 				return;
 			}
+			let contestName;
+			if (url.includes("gym")) {
+				contestName = `gym ${contest}`;
+			} else {
+				contestName = `contest ${contest}`;
+			}
+
 			const name = `${problemName}`;
 
 			// const status = row.querySelector("span.verdict-accepted");
 			const status = dom(row).find("span.verdict-accepted");
 
-			const id = `${contest}${name}`;
+			const id = `${contestName}${name}`;
 			const problem = {
 				platform: "codeforces" as TentacleID,
 				id: id,
 				title: name,
-				contest: contest,
+				contest: contestName,
 				url: `https://codeforces.com${url}` ?? "",
 			};
 
