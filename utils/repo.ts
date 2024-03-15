@@ -49,20 +49,23 @@ export async function writeLuoguToken(
 	log?.("Wrote luogu token.");
 }
 
+const lockKey = "datalock";
+
 export async function acquireDataLock(log?: LogFunc): Promise<boolean> {
 	log?.("Acquiring data lock...");
-	const lock = await client.setnx("datalock", "1");
+
+	const lock = await client.setnx(lockKey, "1");
 	if (!lock) {
 		log?.("Lock exists, aborting...");
 		return false;
 	}
-	await client.expire("lock", 15);
+	await client.expire(lockKey, 15);
 	log?.("Lock acquired.");
 	return true;
 }
 
 export async function releaseDataLock(log?: LogFunc): Promise<void> {
 	log?.("Releasing data lock...");
-	await client.del("datalock");
+	await client.del(lockKey);
 	log?.("Lock released.");
 }
