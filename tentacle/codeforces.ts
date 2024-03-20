@@ -58,18 +58,16 @@ export class CodeforcesTentacle implements Tentacle {
 		await this._lock.acquireAsync();
 		const subUrl = `https://codeforces.com/submissions/${account}`;
 		const resp = await this.fakeFetch(subUrl).then((res) => res.text());
-		let dom = load(resp);
+		let dom = load(resp, {}, true);
 
 		const unofficial = dom("#showUnofficial");
-		// check unofficial has "checked" attribute
+
 		if (unofficial.attr("checked") === undefined) {
-			logger("Unofficial is not checked");
-			// get parent form
-			const form = unofficial.parent("form");
+			logger(`Unofficial is not checked ${unofficial.toString()}`);
 			// get token
-			const token = form.find("input[name=csrf_token]").attr("value");
+			const token = dom("meta[name='X-Csrf-Token']").attr("content");
 			if (!token) {
-				logger(`No token found, ${form.html()}`);
+				logger(`No token found`);
 				this._lock.release();
 				return UserProblemStatus.empty();
 			}
@@ -85,7 +83,7 @@ export class CodeforcesTentacle implements Tentacle {
 		if (table === null) return UserProblemStatus.empty();
 		const rows = table.find("tr:not(.first-row)");
 		rows.each((_, row) => {
-			const h = dom(row).html();
+			const h = dom(row).toString();
 			const cells = dom(row).find("td");
 			const time = dom(cells).find("span.format-time");
 			if (!time.length) {
