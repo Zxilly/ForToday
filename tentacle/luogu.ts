@@ -97,7 +97,7 @@ export class LuoguTentacle implements Tentacle {
 					platform: "luogu",
 					contest: record.contest?.name ?? "",
 					title: `${record.problem.pid} ${record.problem.title}`,
-					url: `https://www.luogu.com.cn/problem/${record.problem.pid}`,
+					problemUrl: `https://www.luogu.com.cn/problem/${record.problem.pid}`,
 				});
 			}
 

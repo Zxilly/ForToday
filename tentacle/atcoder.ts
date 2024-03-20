@@ -37,7 +37,7 @@ export class AtcoderTentacle implements Tentacle {
 				platform: "atcoder",
 				contest: cid2title[p.contest_id],
 				title: p.title,
-				url: `https://atcoder.jp/contests/${p.contest_id}/tasks/${id}`,
+				problemUrl: `https://atcoder.jp/contests/${p.contest_id}/tasks/${id}`,
 			});
 		}
 		return helper.get_status();

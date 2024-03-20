@@ -26,6 +26,7 @@
 		"axios": "^1.6.7",
 		"axios-retry": "^4.0.0",
 		"cheerio": "1.0.0-rc.12",
+		"codeforces-api-ts": "^2.0.1",
 		"eslint-config-prettier": "^9.1.0",
 		"framer-motion": "^11.0.8",
 		"lottie-react": "^2.4.0",

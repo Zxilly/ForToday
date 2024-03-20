@@ -78,7 +78,7 @@ export async function fetchAll(
 				)!.name;
 				result[name] = UserProblemStatus.merge(result[name], status);
 			}
-			logger(`Fetched ${key} all.`);
+			logger(`Batch fetched ${key} done.`);
 		};
 		tasks.push(task());
 	}

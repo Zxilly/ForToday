@@ -6,13 +6,31 @@ import {
 } from "../types/tentacle";
 import { load } from "cheerio";
 import { CODEFORCES_GROUP_ID } from "../constant/server-consts";
-import { isValidDate, LogFunc, ratingParse } from "../utils/utils";
+import { isValidDate, LogFunc, RateLimiter, ratingParse } from "../utils/utils";
 import { slowAES, toHex, toNumbers } from "../utils/cf";
 import AwaitLock from "await-lock";
+import { targets } from "../constant/consts";
+import { type CodeForcesAPI } from "codeforces-api-ts";
+
+type _ = typeof CodeForcesAPI.contest.list;
+
+export type Response<T> =
+	| {
+			status: "OK";
+			result: T;
+	  }
+	| {
+			status: "FAILED";
+			comment: string;
+	  };
 
 export class CodeforcesTentacle implements Tentacle {
 	private _token = "";
-	private _lock = new AwaitLock();
+	private _limiter = new RateLimiter(2000);
+
+	private _ratingCache = new Map<string, number>();
+	private _ratingCached = false;
+	private _ratingMutex = new AwaitLock();
 
 	async requireAuth(logger: LogFunc): Promise<boolean> {
 		const resp = await fetch("https://codeforces.com/").then((r) =>
@@ -38,114 +56,110 @@ export class CodeforcesTentacle implements Tentacle {
 		return true;
 	}
 
+	async callApi<T>(
+		endpoint: string,
+		params: Record<string, string> = {},
+	): Promise<Response<T>> {
+		const url = new URL(`https://codeforces.com/api/${endpoint}`);
+		for (const key in params) {
+			url.searchParams.append(key, params[key]);
+		}
+		return await (
+			await fetch(url, {
+				keepalive: true,
+			})
+		).json();
+	}
+
+	async getRating(account: string): Promise<number | undefined> {
+		await this._ratingMutex.acquireAsync();
+
+		if (!this._ratingCached) {
+			await this._limiter.canExecute();
+			const handles = targets.map((x) => x.accounts.codeforces).join(";");
+			const resp = await this.callApi<User[]>("user.info", { handles });
+			if (resp.status === "FAILED") {
+				this._ratingMutex.release();
+				throw new Error(
+					`Failed to fetch rating, ${(<any>resp).comment}`,
+				);
+			}
+			for (const u of resp.result) {
+				this._ratingCache.set(u.handle, u.rating);
+			}
+			this._ratingCached = true;
+		}
+
+		const rating = this._ratingCache.get(account);
+		this._ratingMutex.release();
+		return rating;
+	}
+
+	async getContest(id: number | undefined): Promise<[string, string]> {
+		if (!id) {
+			return ["PRACTICE", ""];
+		}
+
+		const contestUrl =
+			id >= 100000
+				? `https://codeforces.com/gym/${id}`
+				: `https://codeforces.com/contest/${id}`;
+
+		const name = id >= 100000 ? `Gym ${id}` : `Contest ${id}`;
+
+		return [name, contestUrl];
+	}
+
 	async fetch(account: string, logger: LogFunc): Promise<UserProblemStatus> {
 		const passProblemIds = new Set<string>();
 		const problems = new Array<Problem>();
 
-		const ratingResp = await this.fakeFetch(
-			`https://codeforces.com/profile/${account}`,
-		).then((res) => res.text());
-		const ratingDom = load(ratingResp);
-		const ratingStr = ratingDom(".info")
-			.find("li")
-			.eq(0)
-			.find("span")
-			.eq(0)
-			.text();
-		const rating = parseInt(ratingStr, 10);
+		const rating = await this.getRating(account);
+		if (rating === undefined) {
+			logger(`Failed to fetch rating for ${account}`);
+			return UserProblemStatus.empty();
+		}
+
 		const level = ratingParse(rating);
 
-		await this._lock.acquireAsync();
-		const subUrl = `https://codeforces.com/submissions/${account}`;
-		const resp = await this.fakeFetch(subUrl).then((res) => res.text());
-		let dom = load(resp, {}, true);
+		await this._limiter.canExecute();
 
-		const unofficial = dom("#showUnofficial");
-
-		if (unofficial.attr("checked") === undefined) {
-			logger(`Unofficial is not checked ${unofficial.toString()}`);
-			// get token
-			const token = dom("meta[name='X-Csrf-Token']").attr("content");
-			if (!token) {
-				logger(`No token found`);
-				this._lock.release();
-				return UserProblemStatus.empty();
-			}
-			// trigger unofficial
-			const resp = await this.triggerUnofficial(subUrl, token).then(
-				(res) => res.text(),
-			);
-			dom = load(resp);
-		}
-		this._lock.release();
-
-		const table = dom("table.status-frame-datatable");
-		if (table === null) return UserProblemStatus.empty();
-		const rows = table.find("tr:not(.first-row)");
-		rows.each((_, row) => {
-			const h = dom(row).toString();
-			const cells = dom(row).find("td");
-			const time = dom(cells).find("span.format-time");
-			if (!time.length) {
-				logger(`No time found in row ${h} of ${account}`);
-				return;
-			}
-			const timeStr = time.text()?.trim();
-			if (!timeStr.length) {
-				logger(`No time string found in row ${h} of ${account}`);
-				return;
-			}
-			const date = new Date(timeStr);
-			if (!isValidDate(date)) {
-				return;
-			}
-			const problemName = dom(cells[3]).text()?.trim();
-			if (!problemName.length) {
-				logger(`No problem name found in row ${h} of ${account}`);
-				return;
-			}
-			const url = dom(cells[3]).find("a").attr("href");
-			if (!url) {
-				logger(`No url found in row ${h} of ${account}`);
-				return;
-			}
-			const problemRE = /\/(contest|gym)\/(?<contest>\d*)\/problem\/.*/;
-			const match = url.match(problemRE);
-			if (!match) {
-				logger(
-					`No match found in row ${row} of ${account}, url: ${url}`,
-				);
-				return;
-			}
-			const contest = match.groups?.contest;
-			if (!contest) {
-				logger(`No contest found in row ${h} of ${account}`);
-				return;
-			}
-			let contestName;
-			if (url.includes("gym")) {
-				contestName = `gym ${contest}`;
-			} else {
-				contestName = `contest ${contest}`;
-			}
-
-			const name = `${problemName}`;
-
-			// const status = row.querySelector("span.verdict-accepted");
-			const status = dom(row).find("span.verdict-accepted");
-
-			const id = `${contestName}${name}`;
-			const problem = {
-				platform: "codeforces" as TentacleID,
-				id: id,
-				title: name,
-				contest: contestName,
-				url: `https://codeforces.com${url}` ?? "",
-			};
-
-			if (status.length !== 0) passProblemIds.add(id);
-			problems.push(problem);
+		const submissions = await this.callApi<Submission[]>("user.status", {
+			handle: account,
+			count: "100",
 		});
+
+		if (submissions.status === "FAILED") {
+			logger(
+				`Failed to fetch submissions for ${account}, ${(<any>submissions).comment}`,
+			);
+			return UserProblemStatus.empty();
+		}
+
+		for (const sub of submissions.result) {
+			const time = new Date(sub.creationTimeSeconds * 1000);
+			if (!isValidDate(time)) {
+				continue;
+			}
+			const problemName = `${sub.problem.index} - ${sub.problem.name}`;
+			const contestId = sub.contestId;
+			const [contestName, contestUrl] = await this.getContest(contestId);
+
+			const url = `https://codeforces.com/contest/${contestId}/problem/${sub.problem.index}`;
+			const id = `${contestName}${problemName}`;
+			const problem: Problem = {
+				platform: "codeforces",
+				id: id,
+				title: problemName,
+				contest: contestName,
+				contestUrl: contestUrl,
+				problemUrl: url,
+			};
+			if (sub.verdict === "OK") {
+				passProblemIds.add(id);
+			}
+			problems.push(problem);
+		}
 
 		const failedProblemIds = new Set<string>();
 		for (const problem of problems) {
@@ -284,11 +298,13 @@ export class CodeforcesTentacle implements Tentacle {
 							if (!url) return;
 
 							const status = $(row).find("span.verdict-accepted");
-							const problem = {
-								platform: "codeforces" as TentacleID,
-								url: `https://codeforces.com${url}` ?? "",
+							const problem: Problem = {
+								platform: "codeforces",
+								problemUrl:
+									`https://codeforces.com${url}` ?? "",
 								title: name,
 								contest: contestName,
+								contestUrl: `https://codeforces.com/group/${CODEFORCES_GROUP_ID}/contest/${contestIds[j]}`,
 								id: `${contestName}${name}`,
 							};
 

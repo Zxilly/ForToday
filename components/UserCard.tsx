@@ -168,20 +168,29 @@ function ProblemGroup({
 	}
 	problems.sort((a, b) => a.title.localeCompare(b.title));
 
+	const name = `${problems[0].platform} ${problems[0].contest}`;
+
+	const contest =
+		problems[0].contestUrl === undefined ? (
+			<>{name}</>
+		) : (
+			<Link href={problems[0].contestUrl} isExternal>
+				{name}
+			</Link>
+		);
+
 	return (
 		<div>
 			<div>
-				<Box
-					as="span"
-					color={"gray.500"}
-					fontSize="0.85rem"
-				>{`${problems[0].platform} ${problems[0].contest}`}</Box>
+				<Box as="span" color={"gray.500"} fontSize="0.85rem">
+					{contest}
+				</Box>
 			</div>
 			<Box>
 				{problems.map((problem) => {
 					return (
 						<div key={`${problem.id}`}>
-							<Link href={problem.url} isExternal>
+							<Link href={problem.problemUrl} isExternal>
 								<Box
 									as="span"
 									className={"codeStyle"}

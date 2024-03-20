@@ -1,4 +1,5 @@
 import moment from "moment-timezone";
+import AwaitLock from "await-lock";
 
 export const CRAWL_DAY = 7;
 
@@ -87,5 +88,31 @@ export function ratingColor(rank: number) {
 			return "orange";
 		default:
 			return "red";
+	}
+}
+
+export class RateLimiter {
+	private toResolve: (() => void)[] = [];
+	private lock: AwaitLock;
+
+	constructor(private readonly interval: number) {
+		this.lock = new AwaitLock();
+		setInterval(async () => {
+			await this.lock.acquireAsync();
+			const resolve = this.toResolve.shift();
+			this.lock.release();
+			if (resolve) {
+				resolve();
+			}
+		}, interval);
+	}
+
+	async canExecute(): Promise<void> {
+		return new Promise((resolve) => {
+			this.lock.acquireAsync().then(() => {
+				this.toResolve.push(resolve);
+				this.lock.release();
+			});
+		});
 	}
 }

@@ -27,7 +27,7 @@ export class NowCoderTentacle implements Tentacle {
 				platform: "nowcoder",
 				contest: "",
 				title: info.text() ?? "",
-				url: `https://ac.nowcoder.com${url}`,
+				problemUrl: `https://ac.nowcoder.com${url}`,
 			});
 		});
 		return helper.get_status();

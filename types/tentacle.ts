@@ -4,8 +4,9 @@ export type Problem = {
 	id: string;
 	platform: TentacleID;
 	contest: string;
+	contestUrl?: string;
 	title: string;
-	url: string;
+	problemUrl: string;
 };
 
 export type ProblemWithStatus = Problem & { success: boolean };
