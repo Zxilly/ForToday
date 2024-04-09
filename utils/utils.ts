@@ -94,9 +94,13 @@ export function ratingColor(rank: number) {
 export class RateLimiter {
 	private toResolve: (() => void)[] = [];
 	private lock: AwaitLock;
+	private started = false;
 
 	constructor(private readonly interval: number) {
 		this.lock = new AwaitLock();
+	}
+
+	private async start() {
 		setInterval(async () => {
 			await this.lock.acquireAsync();
 			const resolve = this.toResolve.shift();
@@ -104,12 +108,17 @@ export class RateLimiter {
 			if (resolve) {
 				resolve();
 			}
-		}, interval);
+		}, this.interval);
 	}
 
 	async canExecute(): Promise<void> {
 		return new Promise((resolve) => {
 			this.lock.acquireAsync().then(() => {
+				if (!this.started) {
+					this.start();
+					this.started = true;
+				}
+
 				this.toResolve.push(resolve);
 				this.lock.release();
 			});
