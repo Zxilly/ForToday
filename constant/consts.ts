@@ -70,4 +70,11 @@ export const targets: Target[] = [
             luogu: "1137534",
         },
     },
+    {
+        name: "ycc-41",
+        accounts: {
+            codeforces: "ycc-41",
+            luogu: "1140146",
+        },
+    },
 ];
