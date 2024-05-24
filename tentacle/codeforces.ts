@@ -1,18 +1,11 @@
-import {
-	Problem,
-	Tentacle,
-	TentacleID,
-	UserProblemStatus,
-} from "../types/tentacle";
+import { Problem, Tentacle, UserProblemStatus } from "../types/tentacle";
 import { load } from "cheerio";
 import { CODEFORCES_GROUP_ID } from "../constant/server-consts";
 import { isValidDate, LogFunc, RateLimiter, ratingParse } from "../utils/utils";
 import { slowAES, toHex, toNumbers } from "../utils/cf";
 import AwaitLock from "await-lock";
 import { targets } from "../constant/consts";
-import { type CodeForcesAPI } from "codeforces-api-ts";
-
-type _ = typeof CodeForcesAPI.contest.list;
+import { type Submission, User } from "codeforces-api-ts/dist/types";
 
 export type Response<T> =
 	| {
@@ -80,12 +73,10 @@ export class CodeforcesTentacle implements Tentacle {
 			const resp = await this.callApi<User[]>("user.info", { handles });
 			if (resp.status === "FAILED") {
 				this._ratingMutex.release();
-				throw new Error(
-					`Failed to fetch rating, ${(<any>resp).comment}`,
-				);
+				throw new Error(`Failed to fetch rating, ${resp.comment}`);
 			}
 			for (const u of resp.result) {
-				this._ratingCache.set(u.handle, u.rating);
+				this._ratingCache.set(u.handle, u.rating || -1);
 			}
 			this._ratingCached = true;
 		}
@@ -131,7 +122,7 @@ export class CodeforcesTentacle implements Tentacle {
 
 		if (submissions.status === "FAILED") {
 			logger(
-				`Failed to fetch submissions for ${account}, ${(<any>submissions).comment}`,
+				`Failed to fetch submissions for ${account}, ${submissions.comment}`,
 			);
 			return UserProblemStatus.empty();
 		}
