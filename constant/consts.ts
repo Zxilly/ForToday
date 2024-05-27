@@ -16,6 +16,7 @@ export const targets: Target[] = [
             codeforces: "Algor_",
             nowcoder: "490231204",
             luogu: "595131",
+            atcoder: "Algor_",
         },
     },
     {
@@ -46,6 +47,7 @@ export const targets: Target[] = [
         name: "Jaysea",
         accounts: {
             codeforces: "Jaysea",
+            nowcoder: "171057109",
             luogu: "970976",
         },
     },
@@ -53,6 +55,7 @@ export const targets: Target[] = [
         name: "Go1ng",
         accounts: {
             codeforces: "Go1ng",
+            nowcoder: "132694799",
             luogu: "1145552",
         },
     },
@@ -60,6 +63,7 @@ export const targets: Target[] = [
         name: "ahit_UX",
         accounts: {
             codeforces: "ahit_UX",
+            nowcoder: "300286640",
             luogu: "1124141",
         },
     },
@@ -67,6 +71,7 @@ export const targets: Target[] = [
         name: "aword",
         accounts: {
             codeforces: "aword",
+            nowcoder: "364000614",
             luogu: "1137534",
         },
     },
@@ -74,6 +79,7 @@ export const targets: Target[] = [
         name: "ycc-41",
         accounts: {
             codeforces: "ycc-41",
+            nowcoder: "72730696",
             luogu: "1140146",
         },
     },
