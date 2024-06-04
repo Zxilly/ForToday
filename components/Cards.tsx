@@ -110,10 +110,6 @@ function Cards({
 		}, updateInterval);
 	}, [goNext, updateInterval]);
 
-	useEffect(() => {
-		resetNextTimer();
-	}, [resetNextTimer]);
-
 	const onAnimateEnter = useCallback(() => {
 		setNextPageLoading(true);
 	}, []);
@@ -156,6 +152,7 @@ function Cards({
 															isClosable: true,
 															position: "top",
 														});
+														setStart(0);
 													})
 													.catch(() => {
 														toast({

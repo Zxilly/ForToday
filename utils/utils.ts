@@ -92,36 +92,34 @@ export function ratingColor(rank: number) {
 }
 
 export class RateLimiter {
-	private toResolve: (() => void)[] = [];
+	private interval: number;
+	private lastExecutionTime: number;
 	private lock: AwaitLock;
-	private started = false;
 
-	constructor(private readonly interval: number) {
+	constructor(interval: number) {
+		this.interval = interval;
+		this.lastExecutionTime = 0;
 		this.lock = new AwaitLock();
 	}
 
-	private async start() {
-		setInterval(async () => {
-			await this.lock.acquireAsync();
-			const resolve = this.toResolve.shift();
-			this.lock.release();
-			if (resolve) {
-				resolve();
-			}
-		}, this.interval);
+	private async sleep(ms: number): Promise<void> {
+		return new Promise((resolve) => setTimeout(resolve, ms));
 	}
 
-	async canExecute(): Promise<void> {
-		return new Promise((resolve) => {
-			this.lock.acquireAsync().then(() => {
-				if (!this.started) {
-					this.start();
-					this.started = true;
-				}
+	public async canExecute(): Promise<void> {
+		await this.lock.acquireAsync();
 
-				this.toResolve.push(resolve);
-				this.lock.release();
-			});
-		});
+		try {
+			const now = Date.now();
+			const waitTime = this.interval - (now - this.lastExecutionTime);
+
+			if (waitTime > 0) {
+				await this.sleep(waitTime);
+			}
+
+			this.lastExecutionTime = Date.now();
+		} finally {
+			this.lock.release(); // 释放锁
+		}
 	}
 }

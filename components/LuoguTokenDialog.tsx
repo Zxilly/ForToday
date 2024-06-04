@@ -23,7 +23,6 @@ const LuoguTokenDialog: React.FC = () => {
 	const [loading, setLoading] = useState(false);
 
 	useKey("q", (e) => {
-		console.log(e);
 		e.preventDefault();
 		if (e.ctrlKey) {
 			if (!isOpen) {
@@ -48,7 +47,7 @@ const LuoguTokenDialog: React.FC = () => {
 		}
 
 		setLoading(true);
-		const resp = await fetch("/api/luogu", {
+		const resp = await fetch("/api/luogu/token", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

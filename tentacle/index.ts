@@ -5,15 +5,16 @@ import { LogFunc } from "../utils/utils";
 import { AtcoderTentacle } from "./atcoder";
 import { CodeforcesTentacle } from "./codeforces";
 import { NowCoderTentacle } from "./nowcoder";
+import { LuoguDelegateTentacle } from "./luogu_delegate";
 
 const tentaclesImpl: Partial<Record<TentacleID, Tentacle>> = {
 	codeforces: new CodeforcesTentacle(),
 	nowcoder: new NowCoderTentacle(),
-	// luogu: new LuoguTentacle(), // FIXME: disable luogu for now, for edge runtime
+	luogu: new LuoguDelegateTentacle(),
 	atcoder: new AtcoderTentacle(),
 };
 
-export async function fetchAll(
+export async function batchFetch(
 	logger: LogFunc,
 ): Promise<Record<string, UserProblemStatus>> {
 	const users = targets.map((t) => t.name);
@@ -38,7 +39,7 @@ export async function fetchAll(
 			);
 			for (const target of validTargets) {
 				const account = target.accounts[key as TentacleID]!;
-				// logger(`Fetching ${key} ${account}...`)
+				logger(`Fetching ${key} ${account}...`);
 				const subtask = async () => {
 					const status = await impl.fetch(account, logger);
 					result[target.name] = UserProblemStatus.merge(
@@ -49,7 +50,8 @@ export async function fetchAll(
 				};
 				subtasks.push(subtask());
 			}
-			await Promise.all(subtasks);
+			await Promise.allSettled(subtasks);
+			logger(`Fetched ${key} single done.`);
 		};
 		tasks.push(task());
 	}
@@ -67,7 +69,7 @@ export async function fetchAll(
 		}
 
 		const task = async () => {
-			// logger(`Fetching ${key} all...`)
+			logger(`Batch fetching ${key}...`);
 			const accounts = targets
 				.filter((target) => Object.hasOwn(target.accounts, key))
 				.map((target) => target.accounts[key as TentacleID]!);
@@ -82,6 +84,8 @@ export async function fetchAll(
 		};
 		tasks.push(task());
 	}
-	await Promise.all(tasks);
+
+	await Promise.allSettled(tasks);
+
 	return result;
 }

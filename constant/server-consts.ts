@@ -17,3 +17,16 @@ const redis = new Redis({
 });
 
 export const client = redis;
+
+export const InvalidRequestError = Response.json(
+	{
+		message: "Invalid Request",
+	},
+	{
+		status: 400,
+	},
+);
+
+export const BaseURL =
+	(process.env.VERCEL_URL && `https://${process.env.VERCEL_URL}`) ||
+	"http://localhost:3000";

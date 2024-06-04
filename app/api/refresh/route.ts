@@ -1,4 +1,4 @@
-import { fetchAll } from "../../../tentacle";
+import { batchFetch } from "../../../tentacle";
 import { getNewTimedLogger } from "../../../utils/utils";
 import {
 	acquireDataLock,
@@ -27,19 +27,19 @@ export async function GET() {
 			const error = () => {
 				controller.enqueue(encoder.encode("event: error\ndata: \n\n"));
 				controller.close();
-			}
+			};
 
 			(async () => {
 				logAndWrite("Adding lock...");
 				const haveLock = await acquireDataLock(logAndWrite);
 				if (!haveLock) {
-					error()
+					error();
 					return;
 				}
 				logAndWrite("Lock added.");
 
 				logAndWrite("Fetching...");
-				const data = await fetchAll(logAndWrite);
+				const data = await batchFetch(logAndWrite);
 				logAndWrite("Fetched.");
 				logAndWrite("Saving...");
 				await writeData(data as any);
