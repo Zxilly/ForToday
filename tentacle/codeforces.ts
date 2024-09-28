@@ -291,8 +291,9 @@ export class CodeforcesTentacle implements Tentacle {
 							const status = $(row).find("span.verdict-accepted");
 							const problem: Problem = {
 								platform: "codeforces",
-								problemUrl:
-									`https://codeforces.com${url}` ?? "",
+								problemUrl: url
+									? `https://codeforces.com${url}`
+									: "",
 								title: name,
 								contest: contestName,
 								contestUrl: `https://codeforces.com/group/${CODEFORCES_GROUP_ID}/contest/${contestIds[j]}`,
