@@ -3,7 +3,6 @@
 import { PureUserProblemStatus } from "../types/tentacle";
 import React, {
 	useCallback,
-	useEffect,
 	useMemo,
 	useRef,
 	useState,
@@ -182,13 +181,13 @@ function Cards({
 						</Box>
 					)}
 					<Box m={6} p={6}>
-						<AnimatePresence mode="popLayout">
+						<AnimatePresence mode="wait">
 							<motion.div
 								key={`cards-${start}`}
-								initial={{ y: 0, opacity: 0 }}
+								initial={{ y: -10, opacity: 0 }}
 								animate={{ y: 0, opacity: 1 }}
-								exit={{ y: 0, opacity: 0 }}
-								transition={{ duration: 2 }}
+								exit={{ y: 10, opacity: 0 }}
+								transition={{ duration: 0.5 }}
 								onAnimationStart={onAnimateEnter}
 								onAnimationComplete={onAnimateExit}
 							>
