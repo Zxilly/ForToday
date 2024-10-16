@@ -1,9 +1,7 @@
 import { LuoguToken } from "../types/luogu";
 import axios, { AxiosInstance, AxiosResponse } from "axios";
-import http from "http";
 import dns from "dns";
-import https from "https";
-import { wrapper } from "axios-cookiejar-support";
+import { HttpCookieAgent, HttpsCookieAgent } from "http-cookie-agent/http";
 import { CookieJar } from "tough-cookie";
 
 const jar = new CookieJar();
@@ -29,7 +27,7 @@ const customDNSLookup = (
 		family: number,
 	) => void,
 ): void => {
-	return dns.lookup(
+	dns.lookup(
 		"www.luogu.com.cn.wswebpic.com",
 		options,
 		(err, address, family) => {
@@ -38,16 +36,19 @@ const customDNSLookup = (
 	);
 };
 
-const httpAgent = new http.Agent({ lookup: customDNSLookup });
-const httpsAgent = new https.Agent({ lookup: customDNSLookup });
+const httpAgent = new HttpCookieAgent({
+	cookies: { jar },
+	// lookup: customDNSLookup,
+});
+const httpsAgent = new HttpsCookieAgent({
+	cookies: { jar },
+	// lookup: customDNSLookup,
+});
 
-export const customAxios: AxiosInstance = wrapper(
-	axios.create({
-		httpAgent,
-		httpsAgent,
-		jar,
-	}),
-);
+export const customAxios: AxiosInstance = axios.create({
+	httpAgent,
+	httpsAgent,
+});
 
 export async function luoguFetch(
 	url: string,
