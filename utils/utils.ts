@@ -107,9 +107,12 @@ export class RateLimiter {
 	}
 
 	public async canExecute(): Promise<void> {
-		await this.lock.acquireAsync();
+		let acquired = false;
 
 		try {
+			await this.lock.acquireAsync();
+			acquired = true;
+
 			const now = Date.now();
 			const waitTime = this.interval - (now - this.lastExecutionTime);
 
@@ -118,8 +121,12 @@ export class RateLimiter {
 			}
 
 			this.lastExecutionTime = Date.now();
+		} catch (error) {
+			console.error("Error in canExecute:", error);
 		} finally {
-			this.lock.release(); // 释放锁
+			if (acquired) {
+				this.lock.release();
+			}
 		}
 	}
 }

@@ -8,13 +8,13 @@ export class LuoguDelegateTentacle implements Tentacle {
 	private token: LuoguSavedToken | null = null;
 	private _limiter = new RateLimiter(1000);
 
-	async fetch(account: string, logger: LogFunc): Promise<UserProblemStatus> {
+	async fetch(account: string, _logger: LogFunc): Promise<UserProblemStatus> {
 		if (!this.token) {
 			throw new Error("Luogu token not found");
 		}
 
 		await this._limiter.canExecute();
-		console.warn(`fetch luogu ${account} delegate can execute`);
+
 		const resp = await fetch(BaseURL + "/api/luogu/fetch", {
 			method: "POST",
 			body: JSON.stringify({

@@ -19,18 +19,18 @@ export async function POST(request: Request) {
 
 	const helper = new ProblemHelper();
 	for (let i = 1; ; i++) {
-		const resp = (
-			await luoguFetch(
-				`https://www.luogu.com.cn/record/list?user=${account}&page=${i}&_contentOnly=1`,
-				uid,
-				client_id,
-			)
-		).data;
-		if (resp.currentTemplate !== "RecordList") {
+		const resp = await luoguFetch(
+			`https://www.luogu.com.cn/record/list?user=${account}&page=${i}&_contentOnly=1`,
+			uid,
+			client_id,
+		);
+
+		const data = resp.data;
+		if (data.currentTemplate !== "RecordList") {
 			return Response.json({ message: "Invalid Token" }, { status: 400 });
 		}
 
-		for (const record of resp.currentData.records.result) {
+		for (const record of data.currentData.records.result) {
 			const time = record.submitTime;
 			earliest_submission_time = Math.min(
 				earliest_submission_time,
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
 			});
 		}
 
-		if (resp.currentData.records.count < 20) {
+		if (data.currentData.records.count < 20) {
 			break;
 		}
 		if (!isValidDate(new Date(earliest_submission_time))) {
