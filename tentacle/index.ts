@@ -5,7 +5,7 @@ import { LogFunc } from "../utils/utils";
 import { AtcoderTentacle } from "./atcoder";
 import { CodeforcesTentacle } from "./codeforces";
 import { NowCoderTentacle } from "./nowcoder";
-import { LuoguDelegateTentacle } from "./luogu_delegate";
+import { LuoguDelegateTentacle } from "./luogu";
 
 const tentaclesImpl: Partial<Record<TentacleID, Tentacle>> = {
 	codeforces: new CodeforcesTentacle(),

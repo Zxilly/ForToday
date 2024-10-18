@@ -2,7 +2,6 @@ import { Tentacle, UserProblemStatus } from "../types/tentacle";
 import { LogFunc, RateLimiter, isValidDate } from "../utils/utils";
 import { LuoguSavedToken } from "../types/luogu";
 import { readLuoguToken } from "../utils/repo";
-import { BaseURL } from "../constant/server-consts";
 import { ProblemHelper } from "./helper";
 
 export class LuoguDelegateTentacle implements Tentacle {
