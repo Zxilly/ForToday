@@ -1,7 +1,7 @@
 import { getNewTimedLogger } from "../../../../utils/utils";
 import { LuoguToken } from "../../../../types/luogu";
 import { writeLuoguToken } from "../../../../utils/repo";
-import { checkLuoguToken } from "../../../../utils/luogu";
+import { LuoguTentacle } from "../../../../tentacle/luogu";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 	}
 	logger(`uid: ${uid}, client_id: ${client_id}`);
 
-	const result = await checkLuoguToken({ uid, client_id });
+	const result = await LuoguTentacle.checkToken(uid, client_id);
 	if (!result) {
 		return Response.json(
 			{ message: "Invalid Token" },

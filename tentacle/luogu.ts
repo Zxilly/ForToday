@@ -1,10 +1,11 @@
 import { Tentacle, UserProblemStatus } from "../types/tentacle";
-import { LogFunc, RateLimiter, isValidDate } from "../utils/utils";
-import { LuoguSavedToken } from "../types/luogu";
+import { isValidDate, LogFunc, RateLimiter } from "../utils/utils";
 import { readLuoguToken } from "../utils/repo";
 import { ProblemHelper } from "./helper";
+import { type LuoguSavedToken } from "../types/luogu";
+import { parse, serialize } from "cookie";
 
-export class LuoguDelegateTentacle implements Tentacle {
+export class LuoguTentacle implements Tentacle {
 	private token: LuoguSavedToken | null = null;
 	private _limiter = new RateLimiter(1000);
 
@@ -15,7 +16,11 @@ export class LuoguDelegateTentacle implements Tentacle {
 
 		await this._limiter.canExecute();
 
-		const data = await this.fetchData(account, this.token.uid, this.token.client_id);
+		const data = await this.fetchData(
+			account,
+			this.token.uid,
+			this.token.client_id,
+		);
 
 		return UserProblemStatus.fromObject(data);
 	}
@@ -27,8 +32,7 @@ export class LuoguDelegateTentacle implements Tentacle {
 		}
 
 		await this._limiter.canExecute();
-		const ok = await this.checkToken(token.uid, token.client_id);
-
+		const ok = await LuoguTentacle.checkToken(token.uid, token.client_id);
 		if (!ok) {
 			return false;
 		}
@@ -38,15 +42,18 @@ export class LuoguDelegateTentacle implements Tentacle {
 		return true;
 	}
 
-	async checkToken(uid: string, client_id: string): Promise<boolean> {
-		const resp = await fetch(
+	static async checkToken(uid: string, client_id: string): Promise<boolean> {
+		const resp = await enhancedFetch(
 			"https://www.luogu.com.cn/record/list?user=109757&page=1&_contentOnly=1",
 			{
 				headers: {
-					Cookie: `_uid=${uid}; __client_id=${client_id};`,
 					"User-Agent":
 						"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36 Edg/129.0.0.0",
 				},
+			},
+			{
+				_uid: uid,
+				__client_id: client_id,
 			},
 		);
 
@@ -55,19 +62,26 @@ export class LuoguDelegateTentacle implements Tentacle {
 		return data.currentTemplate === "RecordList";
 	}
 
-	async fetchData(account: string, uid: string, client_id: string): Promise<any> {
+	async fetchData(
+		account: string,
+		uid: string,
+		client_id: string,
+	): Promise<any> {
 		let earliest_submission_time = new Date().getTime();
 
 		const helper = new ProblemHelper();
 		for (let i = 1; ; i++) {
-			const resp = await fetch(
+			const resp = await enhancedFetch(
 				`https://www.luogu.com.cn/record/list?user=${account}&page=${i}&_contentOnly=1`,
 				{
 					headers: {
-						Cookie: `_uid=${uid}; __client_id=${client_id};`,
 						"User-Agent":
 							"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36 Edg/129.0.0.0",
 					},
+				},
+				{
+					_uid: uid,
+					__client_id: client_id,
 				},
 			);
 
@@ -105,4 +119,62 @@ export class LuoguDelegateTentacle implements Tentacle {
 		}
 		return helper.get_status();
 	}
+}
+
+export interface EnhancedFetchOptions extends Omit<RequestInit, "redirect"> {
+	maxRedirects?: number;
+}
+
+export async function enhancedFetch(
+	url: string,
+	options: EnhancedFetchOptions = {},
+	cookieJar: Record<string, string> = {},
+): Promise<Response> {
+	const maxRedirects = options.maxRedirects ?? 20;
+	let redirectCount = 0;
+
+	async function fetchWithCookies(
+		url: string,
+		options: EnhancedFetchOptions,
+	): Promise<Response> {
+		if (redirectCount >= maxRedirects) {
+			throw new Error(
+				`Maximum number of redirects (${maxRedirects}) exceeded`,
+			);
+		}
+
+		const headers = new Headers(options.headers || {});
+
+		if (Object.keys(cookieJar).length > 0) {
+			const cookieString = Object.entries(cookieJar)
+				.map(([name, value]) => serialize(name, value))
+				.join("; ");
+			headers.set("Cookie", cookieString);
+		}
+
+		const response = await fetch(url, {
+			...options,
+			headers,
+			redirect: "manual",
+		});
+
+		const setCookieHeaders = response.headers.getSetCookie();
+		for (const header of setCookieHeaders) {
+			const parsedCookie = parse(header);
+			Object.assign(cookieJar, parsedCookie);
+		}
+
+		if (response.status >= 300 && response.status < 400) {
+			const location = response.headers.get("location");
+			if (location) {
+				redirectCount++;
+				const redirectUrl = new URL(location, url).toString();
+				return fetchWithCookies(redirectUrl, options);
+			}
+		}
+
+		return response;
+	}
+
+	return fetchWithCookies(url, options);
 }

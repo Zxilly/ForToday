@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import {
 	AlertDialog,
 	AlertDialogBody,
@@ -31,6 +31,12 @@ export const UpdateButton: React.FC = () => {
 			setFinished(false);
 		}
 	}, [isOpen]);
+
+	useLayoutEffect(() => {
+		if (!bodyRef.current) return;
+
+		bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
+	}, [content]);
 
 	return (
 		<>
@@ -105,12 +111,9 @@ export const UpdateButton: React.FC = () => {
 									return content + "\n" + e.data;
 								}
 							});
-							bodyRef.current.scrollTop =
-								bodyRef.current.scrollHeight;
 						};
 
-						const errorHandler = () =>
-						{
+						const errorHandler = () => {
 							evtSource.close();
 							setLoading(false);
 							setFinished(true);
@@ -121,7 +124,7 @@ export const UpdateButton: React.FC = () => {
 								isClosable: false,
 								position: "top",
 							});
-						}
+						};
 						evtSource.onerror = errorHandler;
 						evtSource.addEventListener("error", errorHandler);
 					}}
