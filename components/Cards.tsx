@@ -1,13 +1,23 @@
 "use client";
 
 import { PureUserProblemStatus } from "../types/tentacle";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import {
 	Box,
 	ChakraProvider,
 	Container,
 	IconButton,
 	SimpleGrid,
+	Slider,
+	SliderFilledTrack,
+	SliderThumb,
+	SliderTrack,
 	Stack,
 	Tooltip,
 	useToast,
@@ -19,6 +29,7 @@ import { UserCard } from "./UserCard";
 import LuoguTokenDialog from "./LuoguTokenDialog";
 import NoSSR from "./NoSSR";
 import { UpdateButton } from "./UpdateButton";
+import { ratingColor } from "../utils/utils";
 
 function Cards({
 	initialData,
@@ -116,6 +127,12 @@ function Cards({
 		return visibleCardCount !== 1;
 	}, [visibleCardCount]);
 
+	const [slideVal, setSlideVal] = useState(0);
+	useEffect(() => {
+		setSlideVal(start);
+	}, [start]);
+	const [showTooltip, setShowTooltip] = React.useState(false);
+
 	return (
 		<NoSSR>
 			<ChakraProvider>
@@ -172,6 +189,37 @@ function Cards({
 										/>
 									</Tooltip>
 								</Stack>
+								<Slider
+									value={slideVal}
+									orientation="vertical"
+									min={0}
+									max={sortedData.length - 1}
+									isReversed
+									step={1}
+									onChange={(val) => setSlideVal(val)}
+									onChangeEnd={(val) => {
+										setStart(val);
+										resetNextTimer();
+									}}
+									minH="40"
+									onMouseEnter={() => setShowTooltip(true)}
+									onMouseLeave={() => setShowTooltip(false)}
+								>
+									<SliderTrack>
+										<SliderFilledTrack />
+									</SliderTrack>
+									<Tooltip
+										placement="right"
+										label={sortedData[slideVal][0]}
+										color={"white"}
+										bg={ratingColor(
+											sortedData[slideVal][1].level,
+										)}
+										isOpen={showTooltip}
+									>
+										<SliderThumb />
+									</Tooltip>
+								</Slider>
 							</Stack>
 						</Box>
 					)}
