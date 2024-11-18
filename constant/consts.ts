@@ -83,4 +83,109 @@ export const targets: Target[] = [
             luogu: "1140146",
         },
     },
+    {
+        name: "w5q",
+        accounts: {
+            codeforces: "w5q",
+            luogu: "1474169",
+        },
+    },
+    {
+        name: "YLoooX",
+        accounts: {
+            codeforces: "YLoooX",
+        },
+    },
+    {
+        name: "Calian",
+        accounts: {
+            codeforces: "Calian",
+            luogu: "1412639",
+        },
+    },
+    {
+        name: "cjw2368",
+        accounts: {
+            codeforces: "cjw2368",
+            luogu: "1494790",
+        },
+    },
+    {
+        name: "wddhhh",
+        accounts: {
+            codeforces: "wddhhh",
+            luogu: "1498925",
+        },
+    },
+    {
+        name: "cmlxj",
+        accounts: {
+            codeforces: "cmlxj",
+            luogu: "1536648",
+        },
+    },
+    {
+        name: "XchOvO",
+        accounts: {
+            codeforces: "XchOvO",
+        },
+    },
+    {
+        name: "dksak556465",
+        accounts: {
+            codeforces: "dksak556465",
+            luogu: "1497349",
+        },
+    },
+    {
+        name: "E_manjusaka",
+        accounts: {
+            codeforces: "E_manjusaka",
+            luogu: "1584603",
+        },
+    },
+    {
+        name: "RuinTown",
+        accounts: {
+            codeforces: "RuinTown",
+        },
+    },
+    {
+        name: "XFY119",
+        accounts: {
+            codeforces: "XFY119",
+            luogu: "1584767",
+        },
+    },
+    {
+        name: "syanu",
+        accounts: {
+            codeforces: "syanu",
+        },
+    },
+    {
+        name: "XLXTHJ",
+        accounts: {
+            codeforces: "XLXTHJ",
+        },
+    },
+    {
+        name: "JGSSU",
+        accounts: {
+            codeforces: "JGSSU",
+        },
+    },
+    {
+        name: "NagnipNuyoah",
+        accounts: {
+            codeforces: "NagnipNuyoah",
+        },
+    },
+    {
+        name: "zayney",
+        accounts: {
+            codeforces: "zayney",
+            luogu: "1536263",
+        },
+    },
 ];
