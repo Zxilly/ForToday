@@ -20,8 +20,8 @@ export const UpdateButton: React.FC = () => {
 	const toast = useToast();
 
 	const { isOpen, onOpen, onClose } = useDisclosure();
-	const cancelRef = React.useRef<any>();
-	const bodyRef = React.useRef<any>();
+	const cancelRef = React.useRef<any>(undefined);
+	const bodyRef = React.useRef<any>(undefined);
 	const [finished, setFinished] = useState(false);
 	const [content, setContent] = useState("");
 

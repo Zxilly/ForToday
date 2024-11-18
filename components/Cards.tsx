@@ -1,12 +1,7 @@
 "use client";
 
 import { PureUserProblemStatus } from "../types/tentacle";
-import React, {
-	useCallback,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import {
 	Box,
 	ChakraProvider,
