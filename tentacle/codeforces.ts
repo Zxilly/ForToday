@@ -26,7 +26,7 @@ export class CodeforcesTentacle implements Tentacle {
 	private _ratingMutex = new AwaitLock();
 
 	async requireAuth(logger: LogFunc): Promise<boolean> {
-		const resp = await fetch("https://codeforces.com/").then((r) =>
+		const resp = await fetch("https://mirror.codeforces.com/").then((r) =>
 			r.text(),
 		);
 		if (!resp.includes("Redirecting")) {
@@ -179,6 +179,9 @@ export class CodeforcesTentacle implements Tentacle {
 		accounts: string[],
 		logger: LogFunc,
 	): Promise<Map<string, UserProblemStatus>> {
+		// disable for now
+		return new Map<string, UserProblemStatus>();
+
 		if (!CODEFORCES_GROUP_ID) {
 			// no need to execute
 			return new Map<string, UserProblemStatus>();
@@ -196,7 +199,7 @@ export class CodeforcesTentacle implements Tentacle {
 
 		// logger("Fetching Codeforces group submissions...")
 		const res = await this.fakeFetch(
-			`https://codeforces.com/group/${CODEFORCES_GROUP_ID}/contests`,
+			`https://mirror.codeforces.com/group/${CODEFORCES_GROUP_ID}/contests`,
 		).then((res) => res.text());
 		logger("Fetched Codeforces group submissions");
 		const dom = load(res);
@@ -217,105 +220,87 @@ export class CodeforcesTentacle implements Tentacle {
 				.filter((s) => s.length > 0)[0];
 		});
 
-		const contestTasks = new Array<Promise<void>>();
 		for (let j = 0; j < Math.min(contestIds.length, 8); j++) {
-			const contestTask = async () => {
-				const url = `https://codeforces.com/group/${CODEFORCES_GROUP_ID}/contest/${contestIds[j]}/status`;
+			const url = `https://mirror.codeforces.com/group/${CODEFORCES_GROUP_ID}/contest/${contestIds[j]}/status`;
 
-				const singlePageTasks: Promise<void>[] = [];
+			for (let i = 3; i >= 1; i--) {
+				const response = await this.fakeFetch(`${url}/page/${i}`).then(
+					(res) => res.text(),
+				);
+				logger(
+					`Fetched Codeforces contest ${contestNames[j]} submissions page ${i}.`,
+				);
+				const $ = load(response);
 
-				for (let i = 3; i >= 1; i--) {
-					const singlePageTask = async () => {
-						const response = await this.fakeFetch(
-							`${url}/page/${i}`,
-						).then((res) => res.text());
+				if (i !== 1) {
+					const pageIndex = $("span.page-index.active");
+					if (!pageIndex.length) {
+						continue;
+					}
+					const index = pageIndex.eq(0).attr("pageindex");
+					if (!index || index === "") continue;
+					if (parseInt(index) !== i) {
 						logger(
-							`Fetched Codeforces contest ${contestNames[j]} submissions page ${i}.`,
+							`Codeforces contest ${contestNames[j]} submissions page ${i} is not valid.`,
 						);
-						const $ = load(response);
-
-						if (i !== 1) {
-							const pageIndex = $("span.page-index.active");
-							if (!pageIndex.length) {
-								return;
-							}
-							const index = pageIndex.eq(0).attr("pageindex");
-							if (!index || index === "") return;
-							if (parseInt(index) !== i) {
-								logger(
-									`Codeforces contest ${contestNames[j]} submissions page ${i} is not valid.`,
-								);
-								return;
-							}
-						}
-
-						const table = $("table.status-frame-datatable");
-						if (table === null) return;
-						const rows = table.find("tr:not(.first-row)");
-						rows.each((_, row) => {
-							const cells = $(row).find("td");
-							const time = $(cells).find("span.format-time");
-							if (!time.length) return;
-							const timeStr = time.text()?.trim();
-							if (!timeStr) return;
-							const date = new Date(timeStr);
-							if (!isValidDate(date)) return;
-
-							const submitUser = $(cells.children().eq(2))
-								.text()
-								?.trim()
-								.replaceAll("\n", "")
-								.trim();
-							if (!submitUser) {
-								logger(`No submit user found in row ${row}`);
-								return;
-							}
-							if (!accounts.includes(submitUser)) {
-								return;
-							}
-
-							const problemID = $(cells.children().eq(3))
-								.text()
-								?.trim();
-							if (!problemID) return;
-							const contestName = contestNames[j];
-							const name = `${problemID}`;
-
-							const url = cells
-								.children()
-								.eq(3)
-								.eq(0)
-								.attr("href");
-							if (!url) return;
-
-							const status = $(row).find("span.verdict-accepted");
-							const problem: Problem = {
-								platform: "codeforces",
-								problemUrl: url
-									? `https://codeforces.com${url}`
-									: "",
-								title: name,
-								contest: contestName,
-								contestUrl: `https://codeforces.com/group/${CODEFORCES_GROUP_ID}/contest/${contestIds[j]}`,
-								id: `${contestName}${name}`,
-							};
-
-							const submitSuccessIds =
-								submitSuccessIdsMap.get(submitUser)!;
-							const submits = submitMap.get(submitUser)!;
-
-							if (status.length !== 0)
-								submitSuccessIds.add(problem.id);
-							submits.push(problem);
-						});
-					};
-					singlePageTasks.push(singlePageTask());
+						continue;
+					}
 				}
-				await Promise.all(singlePageTasks);
-			};
-			contestTasks.push(contestTask());
+
+				const table = $("table.status-frame-datatable");
+				if (table === null) {
+					continue;
+				}
+				const rows = table.find("tr:not(.first-row)");
+				rows.each((_, row) => {
+					const cells = $(row).find("td");
+					const time = $(cells).find("span.format-time");
+					if (!time.length) return;
+					const timeStr = time.text()?.trim();
+					if (!timeStr) return;
+					const date = new Date(timeStr);
+					if (!isValidDate(date)) return;
+
+					const submitUser = $(cells.children().eq(2))
+						.text()
+						?.trim()
+						.replaceAll("\n", "")
+						.trim();
+					if (!submitUser) {
+						logger(`No submit user found in row ${row}`);
+						return;
+					}
+					if (!accounts.includes(submitUser)) {
+						return;
+					}
+
+					const problemID = $(cells.children().eq(3)).text()?.trim();
+					if (!problemID) return;
+					const contestName = contestNames[j];
+					const name = `${problemID}`;
+
+					const url = cells.children().eq(3).eq(0).attr("href");
+					if (!url) return;
+
+					const status = $(row).find("span.verdict-accepted");
+					const problem: Problem = {
+						platform: "codeforces",
+						problemUrl: url ? `https://codeforces.com${url}` : "",
+						title: name,
+						contest: contestName,
+						contestUrl: `https://mirror.codeforces.com/group/${CODEFORCES_GROUP_ID}/contest/${contestIds[j]}`,
+						id: `${contestName}${name}`,
+					};
+
+					const submitSuccessIds =
+						submitSuccessIdsMap.get(submitUser)!;
+					const submits = submitMap.get(submitUser)!;
+
+					if (status.length !== 0) submitSuccessIds.add(problem.id);
+					submits.push(problem);
+				});
+			}
 		}
-		await Promise.all(contestTasks);
 
 		for (const account of accounts) {
 			const submitSuccessIds = submitSuccessIdsMap.get(account)!;
@@ -350,23 +335,6 @@ export class CodeforcesTentacle implements Tentacle {
 
 	async fakeFetch(url: string) {
 		return await fetch(url, {
-			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-				Cookie: `RCPC=${this._token};`,
-			},
-		});
-	}
-
-	async triggerUnofficial(url: string, token: string) {
-		const data = new FormData();
-		data.append("csrf_token", token);
-		data.append("action", "toggleShowUnofficial");
-		data.append("_tta", "5");
-		return await fetch(url, {
-			method: "POST",
-			redirect: "follow",
-			body: data,
 			headers: {
 				"User-Agent":
 					"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",

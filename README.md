@@ -23,7 +23,7 @@
 1. 修改 `constant/consts.ts` 中的 `targets` 变量，设置需要统计的用户列表
 2. 部署到 `vercel`，同时启动一个 UPSTASH `redis` 实例，并设置 `UPSTASH_REDIS_REST_URL` 和 `UPSTASH_REDIS_REST_TOKEN` 两个环境变量。
 
-> 如果需要爬取 CodeForces 组织内部 VP 数据，需要设置 `CODEFORCES_GROUP_ID` 环境变量。
+[//]: # (> 如果需要爬取 CodeForces 组织内部 VP 数据，需要设置 `CODEFORCES_GROUP_ID` 环境变量。)
 
 ## LICENSE
 
